@@ -1,5 +1,5 @@
 import type { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox-viem";
+import "@nomicfoundation/hardhat-toolbox";
 import testConfig from "./test/config";
 
 const config: HardhatUserConfig = {
@@ -9,7 +9,11 @@ const config: HardhatUserConfig = {
     opal: {
       url: "https://ws-opal.unique.network",
       accounts: testConfig.accounts,
+      chainId: 8882,
     },
+  },
+  mocha: {
+    timeout: 10 * 60 * 1000,
   },
 };
 

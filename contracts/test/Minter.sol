@@ -6,6 +6,8 @@ import {UniqueV2CollectionMinter, CollectionMode, TokenPropertyPermission} from 
 import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMinter.sol";
 
 contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+    event CollectionCreated(address collectionAddress, uint256 collectionId);
+
     constructor() payable UniqueV2CollectionMinter(true, false, true) {}
 
     receive() external payable {}
@@ -14,9 +16,8 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         string memory _name,
         string memory _description,
         string memory _symbol,
-        string memory _collectionCover,
-        Attribute[] memory _attributes
-    ) external payable returns (address) {
+        string memory _collectionCover
+    ) external payable {
         address collectionAddress = _createCollection(
             _name,
             _description,
@@ -25,14 +26,10 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             new TokenPropertyPermission[](0)
         );
 
-        _createToken(
+        emit CollectionCreated(
             collectionAddress,
-            CrossAddress({eth: msg.sender, sub: 0}),
-            _collectionCover,
-            _attributes
+            COLLECTION_HELPERS.collectionId(collectionAddress)
         );
-
-        return collectionAddress;
     }
 
     function mintToken(
