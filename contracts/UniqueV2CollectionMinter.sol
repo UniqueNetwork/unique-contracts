@@ -2,32 +2,17 @@
 pragma solidity 0.8.24;
 
 import "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./UniqueV2MetadataManager.sol";
 
-contract CollectionMinter is UniqueV2MetadataManager, Ownable {
-    CollectionHelpers private constant COLLECTION_HELPERS =
+abstract contract UniqueV2CollectionMinter is UniqueV2MetadataManager {
+    CollectionHelpers internal constant COLLECTION_HELPERS =
         CollectionHelpers(0x6C4E9fE1AE37a41E93CEE429e8E1881aBdcbb54F);
-
-    uint256 private s_collectionCreationFee;
 
     constructor(
         bool _mutable,
         bool _tokenOwner,
         bool _admin
-    )
-        payable
-        UniqueV2MetadataManager(_mutable, _tokenOwner, _admin)
-        Ownable(msg.sender)
-    {
-        s_collectionCreationFee = 2e18;
-    }
-
-    receive() external payable {}
-
-    function changeCollectionCreationFee(uint256 _newFee) external onlyOwner {
-        s_collectionCreationFee = _newFee;
-    }
+    ) UniqueV2MetadataManager(_mutable, _tokenOwner, _admin) {}
 
     function _createCollection(
         string memory _name,
@@ -35,6 +20,7 @@ contract CollectionMinter is UniqueV2MetadataManager, Ownable {
         string memory _symbol,
         string memory _collectionCover,
         // CollectionMode mode,
+        // CollectionNestingAndPermission nesting_settings,
         // CrossAddress memory _pending_sponsor,
         TokenPropertyPermission[] memory _token_property_permissions
     ) internal returns (address) {
@@ -48,9 +34,9 @@ contract CollectionMinter is UniqueV2MetadataManager, Ownable {
         );
         data.properties = getCollectionPropertiesV2(_collectionCover);
 
-        address collection = COLLECTION_HELPERS.createCollection{value: 2e18}(
-            data
-        );
+        address collection = COLLECTION_HELPERS.createCollection{
+            value: COLLECTION_HELPERS.collectionCreationFee()
+        }(data);
         return collection;
     }
 }
