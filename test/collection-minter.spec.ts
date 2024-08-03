@@ -8,6 +8,8 @@ import testConfig from "./utils/config";
 it("Can mint collection for free and mint tokens for free after that", async () => {
   const [collectionOwner, user] = await ethers.getSigners();
 
+  console.log(await ethers.provider.getBalance(collectionOwner));
+
   // NOTE: get user's balance before minting
   // user will send transactions but for *free*
   const userBalanceBefore = await ethers.provider.getBalance(user);
@@ -24,11 +26,13 @@ it("Can mint collection for free and mint tokens for free after that", async () 
 
   // NOTE: collectionOwner sets self-sponsorship for the contract
   const contractHelpers = testConfig.contractHelpers.connect(collectionOwner);
-  await contractHelpers.selfSponsoredEnable(minter);
+  await contractHelpers.selfSponsoredEnable(minter, { gasLimit: 300_000 });
   // Set rate limit 0 (every tx will be sponsored)
-  await contractHelpers.setSponsoringRateLimit(minter, 0);
+  await contractHelpers.setSponsoringRateLimit(minter, 0, {
+    gasLimit: 300_000,
+  });
   // Set generous mode (all users sponsored)
-  await contractHelpers.setSponsoringMode(minter, 2);
+  await contractHelpers.setSponsoringMode(minter, 2, { gasLimit: 300_000 });
 
   // Log Minter's address
   console.log(
@@ -68,7 +72,7 @@ it("Can mint collection for free and mint tokens for free after that", async () 
       { gasLimit: 300000 },
     );
 
-  // NOTE: check that user's balance doesn't changed
+  // NOTE: check that user's balance doesn't change
   const userBalanceAfter = await ethers.provider.getBalance(user);
   expect(userBalanceAfter).to.deep.eq(userBalanceBefore);
 });

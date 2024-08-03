@@ -60,7 +60,8 @@ abstract contract UniqueV2TokenMinter {
             memory tokenData1 = '{"schemaName":"unique","schemaVersion":"2.0.0","image":"';
         string memory tokenData2 = string.concat(
             '",',
-            _attributesBuilder(_attributes)
+            _attributesBuilder(_attributes),
+            "}"
         );
 
         return bytes(string.concat(tokenData1, _image, tokenData2));
