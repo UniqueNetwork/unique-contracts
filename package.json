@@ -1,0 +1,43 @@
+{
+  "name": "contracts",
+  "license": "MIT",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "npx hardhat test --config ./hardhat.test.config.ts",
+    "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network testnet",
+    "run:hh": "npx hardhat run --no-compile",
+    "codestyle": "prettier . --write"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "@unique-nft/utils": "^0.3.20",
+    "dotenv": "^16.4.5"
+  },
+  "packageManager": "yarn@1.22.22",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.7",
+    "@nomicfoundation/hardhat-ethers": "^3.0.6",
+    "@nomicfoundation/hardhat-ignition": "^0.15.0",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.5",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@types/chai": "^4.2.0",
+    "@types/chai-as-promised": "^7.1.6",
+    "@types/mocha": ">=9.1.0",
+    "@types/node": ">=18.0.0",
+    "@unique-nft/solidity-interfaces": "^0.70.0",
+    "chai": "^4.2.0",
+    "ethers": "^6.13.2",
+    "hardhat": "^2.22.7",
+    "hardhat-gas-reporter": "^1.0.8",
+    "prettier": "^3.3.3",
+    "prettier-plugin-solidity": "^1.3.1",
+    "solidity-coverage": "^0.8.0",
+    "ts-node": ">=8.0.0",
+    "typechain": "^8.3.2",
+    "typescript": "~5.0.4"
+  }
+}

@@ -1,11 +1,6 @@
-.env
-.DS_Store
+node_modules
 .vscode
 
-node_modules
-package-lock.json
-
-# Hardhat files
 /cache
 /artifacts
 
@@ -19,7 +14,3 @@ package-lock.json
 
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
-
-# Remix
-.states
-/contracts/artifacts
