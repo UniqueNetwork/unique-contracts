@@ -1,37 +1,74 @@
 import { it } from "mocha";
 import { ethers } from "hardhat";
 import { parseEther } from "ethers";
+import { Address } from "@unique-nft/utils";
 import { expect } from "chai";
-import { Minter__factory } from "../typechain-types";
+import testConfig from "./utils/config";
 
-it("Can mint collection", async () => {
-  const [signer1, signer2] = await ethers.getSigners();
+it("Can mint collection for free and mint tokens for free after that", async () => {
+  const [collectionOwner, user] = await ethers.getSigners();
 
-  const signer1Balance = await ethers.provider.getBalance(signer1);
+  // NOTE: get user's balance before minting
+  // user will send transactions but for *free*
+  const userBalanceBefore = await ethers.provider.getBalance(user);
+  console.log(userBalanceBefore);
 
-  console.log(
-    `Balance of ${signer1.address}: ${ethers.formatEther(signer1Balance)} ETH`,
-  );
-
+  // NOTE: collectionOwner deploy Minter contract
   const MinterFactory = await ethers.getContractFactory("Minter");
-  const minter = await MinterFactory.deploy({
+  const minter = await MinterFactory.connect(collectionOwner).deploy({
     gasLimit: 3000_000,
-    value: parseEther("2"),
+    value: parseEther("30"),
   });
-
   await minter.waitForDeployment();
+  const minterAddress = await minter.getAddress();
 
-  const collectionResponse = await minter.mintCollection(
-    "N",
-    "NN",
-    "NNN",
-    "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmQRUMbyfvioTcYiJYorEK6vNT3iN4pM6Sci9A2gQBuwuA",
-    { gasLimit: 1000_000 },
+  // NOTE: collectionOwner sets self-sponsorship for the contract
+  const contractHelpers = testConfig.contractHelpers.connect(collectionOwner);
+  await contractHelpers.selfSponsoredEnable(minter);
+  // Set rate limit 0 (every tx will be sponsored)
+  await contractHelpers.setSponsoringRateLimit(minter, 0);
+  // Set generous mode (all users sponsored)
+  await contractHelpers.setSponsoringMode(minter, 2);
+
+  // Log Minter's address
+  console.log(
+    "MINTER",
+    minterAddress,
+    Address.mirror.ethereumToSubstrate(minterAddress),
   );
 
-  const receipt = await collectionResponse.wait();
+  // NOTE: user mints collection for free!
+  // This collection will be automatically sponsored by Minter
+  const mintCollectionTx = await minter
+    .connect(user)
+    .mintCollection(
+      "N",
+      "NN",
+      "NNN",
+      "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmQRUMbyfvioTcYiJYorEK6vNT3iN4pM6Sci9A2gQBuwuA",
+      { gasLimit: 1000_000 },
+    );
+
+  const receipt = await mintCollectionTx.wait();
   if (!receipt) throw Error("No receipt");
 
-  const logs = receipt.logs;
-  console.log(receipt.logs);
+  // NOTE: just print minted collection address
+  const filter = minter.filters.CollectionCreated;
+  const [event] = await minter.queryFilter(filter, -100);
+  console.log(event.args.collectionAddress);
+
+  // NOTE: user mints token for free!
+  // fees will be paid by Minter
+  await minter
+    .connect(user)
+    .mintToken(
+      event.args.collectionAddress,
+      "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmY7hbSNiwE3ApYp83CHWFdqrcEAM6AvChucBVA6kC1e8u",
+      [{ trait_type: "Power", value: "42" }],
+      { gasLimit: 300000 },
+    );
+
+  // NOTE: check that user's balance doesn't changed
+  const userBalanceAfter = await ethers.provider.getBalance(user);
+  expect(userBalanceAfter).to.deep.eq(userBalanceBefore);
 });

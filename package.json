@@ -1,13 +1,16 @@
 {
-  "license": "Apache-2.0",
+  "name": "contracts",
+  "license": "MIT",
   "version": "0.0.1",
   "scripts": {
-    "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network opal",
+    "test": "npx hardhat test --config ./hardhat.test.config.ts",
+    "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network testnet",
     "run:hh": "npx hardhat run --no-compile",
     "codestyle": "prettier . --write"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.2",
+    "@unique-nft/utils": "^0.3.20",
     "dotenv": "^16.4.5"
   },
   "packageManager": "yarn@1.22.22",

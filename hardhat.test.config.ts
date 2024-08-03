@@ -1,17 +1,17 @@
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import testConfig from "./test/config";
+import testConfig from "./test/utils/config";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
   networks: {
-    hardhat: {},
-    opal: {
-      url: "https://ws-opal.unique.network",
+    testnet: {
+      url: testConfig.rpc,
       accounts: testConfig.accounts,
       chainId: 8882,
     },
   },
+  defaultNetwork: "testnet",
   mocha: {
     timeout: 10 * 60 * 1000,
   },
