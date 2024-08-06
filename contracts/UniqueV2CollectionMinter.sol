@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {CollectionHelpers, CreateCollectionData, CollectionMode} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
+import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
+import "./libraries/UniquePrecompiles.sol";
 import "./UniqueV2MetadataManager.sol";
 
 /**
  * @title UniqueV2CollectionMinter
  * @dev Abstract contract for minting collections in the Unique V2 Schema.
  */
-abstract contract UniqueV2CollectionMinter is UniqueV2MetadataManager {
-    CollectionHelpers internal constant COLLECTION_HELPERS =
-        CollectionHelpers(0x6C4E9fE1AE37a41E93CEE429e8E1881aBdcbb54F);
-
+abstract contract UniqueV2CollectionMinter is
+    UniqueV2MetadataManager,
+    UniquePrecompiles
+{
     /**
      * @dev Initializes the contract with default property permissions.
      * @param _mutable Boolean indicating if properties are mutable by default.
@@ -39,6 +40,7 @@ abstract contract UniqueV2CollectionMinter is UniqueV2MetadataManager {
         string memory _description,
         string memory _symbol,
         string memory _collectionCover,
+        CollectionLimitValue[] memory _limits,
         Property[] memory _customCollectionProperties,
         // CollectionMode mode,
         // CollectionNestingAndPermission nesting_settings,
@@ -50,6 +52,7 @@ abstract contract UniqueV2CollectionMinter is UniqueV2MetadataManager {
         data.description = _description;
         data.mode = CollectionMode.Nonfungible;
         data.token_prefix = _symbol;
+        data.limits = _limits;
         data.token_property_permissions = withTokenPropertyPermissionsUniqueV2(
             _customTokenPropertyPermissions
         );
