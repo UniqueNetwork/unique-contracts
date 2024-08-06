@@ -4,57 +4,32 @@ pragma solidity 0.8.24;
 import {PropertyPermission, TokenPropertyPermission, TokenPermissionField, Property} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 
 /**
- * @title UniqueV2MetadataManager
+ * @title UniqueV2Metadata
  * @dev Abstract contract for managing metadata and permissions in the Unique V2 Schema.
  */
-abstract contract UniqueV2MetadataManager {
-    /// @notice Default Token Property Permissions
-    PropertyPermission[] private s_defaultTPP;
-
-    /**
-     * @dev Initializes the contract with default property permissions.
-     * @param _defaultMutable Boolean indicating if properties are mutable by default.
-     * @param _defaultTokenOwner Boolean indicating if the token owner has permissions by default.
-     * @param _defaultCollectionAdmin Boolean indicating if the collection admin has permissions by default.
-     */
-    constructor(
-        bool _defaultMutable,
-        bool _defaultTokenOwner,
-        bool _defaultCollectionAdmin
-    ) {
-        s_defaultTPP.push(
-            PropertyPermission({
-                code: TokenPermissionField.TokenOwner,
-                value: _defaultTokenOwner
-            })
-        );
-        s_defaultTPP.push(
-            PropertyPermission({
-                code: TokenPermissionField.CollectionAdmin,
-                value: _defaultCollectionAdmin
-            })
-        );
-        s_defaultTPP.push(
-            PropertyPermission({
-                code: TokenPermissionField.Mutable,
-                value: _defaultMutable
-            })
-        );
-    }
-
+library UniqueV2Metadata {
     /**
      * @dev Extends default token property permissions with custom permissions.
      * @param _customTPPs Array of custom Token Property Permissions.
      * @return Array of extended Token Property Permissions.
      */
-    function withTokenPropertyPermissionsUniqueV2(
-        TokenPropertyPermission[] memory _customTPPs
-    ) internal view returns (TokenPropertyPermission[] memory) {
+    function withUniqueV2TokenPropertyPermissions(
+        TokenPropertyPermission[] memory _customTPPs,
+        bool _defaultMutable,
+        bool _defaultTokenOwner,
+        bool _defaultCollectionAdmin
+    ) internal pure returns (TokenPropertyPermission[] memory) {
         uint256 tppLength = _customTPPs.length + 8;
         TokenPropertyPermission[]
             memory extendedTPPs = new TokenPropertyPermission[](tppLength);
 
-        PropertyPermission[] memory defaultTPP = s_defaultTPP;
+        PropertyPermission[]
+            memory defaultTPP = getDefaultTokenPropertyPermission(
+                _defaultMutable,
+                _defaultTokenOwner,
+                _defaultCollectionAdmin
+            );
+
         extendedTPPs[0] = TokenPropertyPermission({
             key: "URI",
             permissions: defaultTPP
@@ -109,9 +84,9 @@ abstract contract UniqueV2MetadataManager {
      * @param customCollectionProperties Array of custom collection properties.
      * @return Array of collection properties including Unique Schema 2.0 specifications.
      */
-    function withCollectionPropertiesUniqueV2(
-        string memory coverImage,
-        Property[] memory customCollectionProperties
+    function withUniqueV2CollectionProperties(
+        Property[] memory customCollectionProperties,
+        string memory coverImage
     ) internal pure returns (Property[] memory) {
         uint256 totalPropertiesLength = customCollectionProperties.length + 3;
         Property[] memory propertiesV2 = new Property[](totalPropertiesLength);
@@ -141,5 +116,31 @@ abstract contract UniqueV2MetadataManager {
         }
 
         return propertiesV2;
+    }
+
+    function getDefaultTokenPropertyPermission(
+        bool _defaultMutable,
+        bool _defaultTokenOwner,
+        bool _defaultCollectionAdmin
+    ) private pure returns (PropertyPermission[] memory) {
+        PropertyPermission[]
+            memory defaultPropertyPermissions = new PropertyPermission[](3);
+
+        defaultPropertyPermissions[0] = PropertyPermission({
+            code: TokenPermissionField.Mutable,
+            value: _defaultMutable
+        });
+
+        defaultPropertyPermissions[1] = PropertyPermission({
+            code: TokenPermissionField.TokenOwner,
+            value: _defaultTokenOwner
+        });
+
+        defaultPropertyPermissions[2] = PropertyPermission({
+            code: TokenPermissionField.CollectionAdmin,
+            value: _defaultCollectionAdmin
+        });
+
+        return defaultPropertyPermissions;
     }
 }

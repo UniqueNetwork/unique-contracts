@@ -27,10 +27,10 @@ abstract contract UniqueV2TokenMinter {
      */
     function _createToken(
         address _collectionAddress,
-        CrossAddress memory _to,
         string memory _image,
-        Attribute[] memory _attributes
-    ) internal {
+        Attribute[] memory _attributes,
+        CrossAddress memory _to
+    ) internal returns (uint256) {
         UniqueNFT nft = UniqueNFT(_collectionAddress);
 
         Property memory tokenData = Property({
@@ -43,7 +43,7 @@ abstract contract UniqueV2TokenMinter {
         properties[1] = Property({key: "schemaVersion", value: "2.0.0"});
         properties[2] = tokenData;
 
-        nft.mintCross(_to, properties);
+        return nft.mintCross(_to, properties);
     }
 
     /**

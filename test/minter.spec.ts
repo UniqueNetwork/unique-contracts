@@ -50,7 +50,7 @@ it("Can mint collection for free and mint tokens for free after that", async () 
       "NN",
       "NNN",
       "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmQRUMbyfvioTcYiJYorEK6vNT3iN4pM6Sci9A2gQBuwuA",
-      { gasLimit: 1000_000 },
+      { gasLimit: 2000_000 },
     );
 
   const receipt = await mintCollectionTx.wait();
@@ -70,7 +70,8 @@ it("Can mint collection for free and mint tokens for free after that", async () 
       "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmY7hbSNiwE3ApYp83CHWFdqrcEAM6AvChucBVA6kC1e8u",
       [{ trait_type: "Power", value: "42" }],
       { gasLimit: 300000 },
-    );
+    )
+    .then((tx) => tx.wait());
 
   // NOTE: check that user's balance doesn't change
   const userBalanceAfter = await ethers.provider.getBalance(user);

@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import {UniqueNFT} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
-import {Property} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
+import {Property, CollectionLimitValue} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import {UniqueV2CollectionMinter, CollectionMode, TokenPropertyPermission} from "../UniqueV2CollectionMinter.sol";
 import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMinter.sol";
 
@@ -14,7 +14,7 @@ import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMint
  * @dev Contract for minting collections and tokens in the Unique Schema V2.
  * It sets sponsoring for each collection to create a gasless experience for end users.
  * Inherits from UniqueV2CollectionMinter and UniqueV2TokenMinter.
- * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/collection-minter.spec.ts
+ * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/minter.spec.ts
  */
 contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     /// @dev Event emitted when a new collection is created.
@@ -51,6 +51,7 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             _description,
             _symbol,
             _collectionCover,
+            new CollectionLimitValue[](0),
             new Property[](0),
             new TokenPropertyPermission[](0)
         );
@@ -95,9 +96,9 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     ) external {
         _createToken(
             collectionAddress,
-            CrossAddress({eth: msg.sender, sub: 0}),
             _image,
-            _attributes
+            _attributes,
+            CrossAddress({eth: msg.sender, sub: 0})
         );
     }
 }
