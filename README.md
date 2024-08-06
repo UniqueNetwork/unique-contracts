@@ -10,12 +10,13 @@ This repository contains example smart contracts for minting collections and tok
 
 ### Contracts
 
-- [`UniqueV2CollectionMinter.sol`](./contracts/UniqueV2CollectionMinter.sol): This contract provides functionality to create collections in the Unique Schema V2.
-- [`UniqueV2TokenMinter.sol`](./contracts/UniqueV2TokenMinter.sol): This contract provides functionality to create tokens in the Unique Schema V2.
+- [`UniqueV2CollectionMinter.sol`](./contracts/UniqueV2CollectionMinter.sol): provides functionality to create collections in the Unique Schema V2.
+- [`UniqueV2TokenMinter.sol`](./contracts/UniqueV2TokenMinter.sol): provides functionality to create tokens in the Unique Schema V2.
 
 ### Example Usage
 
 - [`Minter.sol`](./contracts/recipes/Minter.sol): Demonstrates how to create a gasless experience for minting collections and NFTs.
+- [`POAP.sol`](./contracts/recipes/POAP.sol): Demonstrates how to create a POAP contract. Tokens minting sponsored by the POAP contract itself. Every account can mint only one NFT and cannot transfer it.
 
 ## Run tests
 

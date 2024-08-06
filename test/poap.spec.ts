@@ -41,8 +41,8 @@ it("POAP contract owner can create event and user without UNQ can mint NFT", asy
 
   // NOTE: get current timestamp
   const timestampNow = await poap.timestampNow();
-  const eventStartTime = timestampNow + 50n;
-  const eventEndTime = timestampNow + 200n;
+  const eventStartTime = timestampNow;
+  const eventEndTime = timestampNow + 1000n;
 
   // NOTE: event-host mints collection for 5 UNQ (EVENT_CREATION_FEE)
   // This collection will be automatically sponsored by POAP contract
@@ -79,6 +79,7 @@ it("POAP contract owner can create event and user without UNQ can mint NFT", asy
   const [event] = await poap.queryFilter(filter, -100);
   console.log("Collection address", event.args.collectionAddress);
 
+  console.log(await poap.timestampNow());
   // NOTE: userWithoutUNQ do not have any UNQ and mints token for free!
   // fees will be paid by POAP contract
   await poap
@@ -88,7 +89,6 @@ it("POAP contract owner can create event and user without UNQ can mint NFT", asy
       { eth: userWithoutUNQ.address, sub: 0 },
       { gasLimit: 300_000 },
     )
-    .then((tx) => tx.wait());
-
-  console.log("POAP balance after:", await ethers.provider.getBalance(poap));
+    .then((tx) => tx.wait()),
+    console.log("POAP balance after:", await ethers.provider.getBalance(poap));
 });
