@@ -1,5 +1,6 @@
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-gas-reporter";
 import testConfig from "./test/utils/config";
 
 const config: HardhatUserConfig = {
@@ -14,6 +15,9 @@ const config: HardhatUserConfig = {
   defaultNetwork: "testnet",
   mocha: {
     timeout: 10 * 60 * 1000,
+  },
+  gasReporter: {
+    enabled: true,
   },
 };
 

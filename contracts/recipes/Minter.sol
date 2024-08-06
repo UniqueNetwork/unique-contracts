@@ -14,7 +14,7 @@ import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMint
  * @dev Contract for minting collections and tokens in the Unique Schema V2.
  * It sets sponsoring for each collection to create a gasless experience for end users.
  * Inherits from UniqueV2CollectionMinter and UniqueV2TokenMinter.
- * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/collection-minter.spec.ts
+ * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/minter.spec.ts
  */
 contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     /// @dev Event emitted when a new collection is created.
@@ -96,9 +96,9 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     ) external {
         _createToken(
             collectionAddress,
-            CrossAddress({eth: msg.sender, sub: 0}),
             _image,
-            _attributes
+            _attributes,
+            CrossAddress({eth: msg.sender, sub: 0})
         );
     }
 }

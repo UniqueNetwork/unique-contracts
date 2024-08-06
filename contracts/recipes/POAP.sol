@@ -6,29 +6,23 @@ import {Property, CollectionMode, TokenPropertyPermission, CollectionLimitValue,
 import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
 import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMinter.sol";
 
-struct EventToken {
-    string image;
-    Attribute[] attributes;
-}
-
-struct EventDuration {
+struct EventConfig {
     uint256 startTimestamp;
     uint256 endTimestamp;
+    string tokenImage;
+    Attribute[] attributes;
 }
 
 contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     uint256 public constant ACCOUNT_TOKEN_LIMIT = 1;
+
     uint256 private s_collectionCreationFee;
-
-    mapping(address collection => CrossAddress owner)
-        private s_collectionOwnerOf;
-
-    mapping(address collection => EventDuration) s_collectionEvent;
+    mapping(address collection => EventConfig) s_collectionEvent;
 
     event CollectionCreated(uint256 collectionId, address collectionAddress);
     event TokenCreated(
         CrossAddress indexed owner,
-        uint256 colletionId,
+        uint256 indexed colletionId,
         uint256 tokenId
     );
 
@@ -38,7 +32,7 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
 
     constructor(
         uint256 _collectionCreationFee
-    ) UniqueV2CollectionMinter(true, false, true) {
+    ) UniqueV2CollectionMinter(true, false, true) payable {
         s_collectionCreationFee = _collectionCreationFee;
     }
 
@@ -49,9 +43,7 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         string memory _description,
         string memory _symbol,
         string memory _collectionCover,
-        uint256 _startEventTimestamp,
-        uint256 _endEventTimestamp,
-        CrossAddress memory _owner
+        EventConfig memory _eventConfig
     ) external payable {
         if (msg.value != s_collectionCreationFee) revert Poap__IncorrectFee();
 
@@ -82,18 +74,26 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
 
-        // Set collection sponsorship to the contract address
+        // Set collection sponsorship
+        // every transaction with be paid by POAP-contract address
         collection.setCollectionSponsorCross(
             CrossAddress({eth: address(this), sub: 0})
         );
-        // Confirm the collection sponsorship
+        // ...confirm collection sponsorship
         collection.confirmCollectionSponsorship();
 
-        s_collectionOwnerOf[collectionAddress] = _owner;
-        s_collectionEvent[collectionAddress] = EventDuration({
-            startTimestamp: _startEventTimestamp,
-            endTimestamp: _endEventTimestamp
-        });
+        s_collectionEvent[collectionAddress].startTimestamp = _eventConfig
+            .startTimestamp;
+        s_collectionEvent[collectionAddress].endTimestamp = _eventConfig
+            .endTimestamp;
+        s_collectionEvent[collectionAddress].tokenImage = _eventConfig
+            .tokenImage;
+
+        for (uint i = 0; i < _eventConfig.attributes.length; i++) {
+            s_collectionEvent[collectionAddress].attributes.push(
+                _eventConfig.attributes[i]
+            );
+        }
 
         emit CollectionCreated(
             COLLECTION_HELPERS.collectionId(collectionAddress),
@@ -105,7 +105,7 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         address _collectionAddress,
         CrossAddress memory _owner
     ) external {
-        EventDuration memory collectionEvent = s_collectionEvent[
+        EventConfig memory collectionEvent = s_collectionEvent[
             _collectionAddress
         ];
         if (block.timestamp < collectionEvent.startTimestamp)
@@ -113,31 +113,20 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         if (block.timestamp > collectionEvent.endTimestamp)
             revert Poap__EventFinished();
 
-        // // Pick pseudo random NFT from possible NFTs
-        // uint256 pseudoRandomIndex = uint256(
-        //     keccak256(
-        //         abi.encodePacked(block.timestamp, block.prevrandao, msg.sender)
-        //     )
-        // ) % collectionEvent.possibleTokens.length;
-        // EventToken memory tokenToMint = collectionEvent.possibleTokens[
-        //     pseudoRandomIndex
-        // ];
-
-        // // Mint an NFT
-        // uint256 tokenId = _createToken(
-        //     _collectionAddress,
-        //     _owner,
-        //     tokenToMint.image,
-        //     tokenToMint.attributes
-        // );
-
-        // emit TokenCreated(
-        //     _owner,
-        //     COLLECTION_HELPERS.collectionId(_collectionAddress),
-        //     tokenId
-        // );
+        uint256 tokenId = _createToken(
+            _collectionAddress,
+            collectionEvent.tokenImage,
+            collectionEvent.attributes,
+            _owner
+        );
+        emit TokenCreated(
+            _owner,
+            COLLECTION_HELPERS.collectionId(_collectionAddress),
+            tokenId
+        );
     }
 
-    // function setCollectionCreationFee() external onlyOwner {...}
-    // function claimCollectionOwnership() external onlyCollectionOwner {...}
+    function timestampNow() external view returns (uint256) {
+        return block.timestamp;
+    }
 }

@@ -3,27 +3,22 @@ pragma solidity 0.8.24;
 
 import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import "./libraries/UniquePrecompiles.sol";
-import "./UniqueV2MetadataManager.sol";
+import "./libraries/UniqueV2Metadata.sol";
 
 /**
  * @title UniqueV2CollectionMinter
  * @dev Abstract contract for minting collections in the Unique V2 Schema.
  */
-abstract contract UniqueV2CollectionMinter is
-    UniqueV2MetadataManager,
-    UniquePrecompiles
-{
+abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
+    using UniqueV2Metadata for *;
+
     /**
      * @dev Initializes the contract with default property permissions.
      * @param _mutable Boolean indicating if properties are mutable by default.
      * @param _tokenOwner Boolean indicating if the token owner has permissions by default.
      * @param _admin Boolean indicating if the collection admin has permissions by default.
      */
-    constructor(
-        bool _mutable,
-        bool _tokenOwner,
-        bool _admin
-    ) UniqueV2MetadataManager(_mutable, _tokenOwner, _admin) {}
+    constructor(bool _mutable, bool _tokenOwner, bool _admin) {}
 
     /**
      * @dev Internal function to create a new collection.
@@ -53,13 +48,10 @@ abstract contract UniqueV2CollectionMinter is
         data.mode = CollectionMode.Nonfungible;
         data.token_prefix = _symbol;
         data.limits = _limits;
-        data.token_property_permissions = withTokenPropertyPermissionsUniqueV2(
-            _customTokenPropertyPermissions
-        );
-        data.properties = withCollectionPropertiesUniqueV2(
-            _collectionCover,
-            _customCollectionProperties
-        );
+        data.token_property_permissions = _customTokenPropertyPermissions
+            .withUniqueV2TokenPropertyPermissions(true, false, true);
+        data.properties = _customCollectionProperties
+            .withUniqueV2CollectionProperties(_collectionCover);
 
         address collection = COLLECTION_HELPERS.createCollection{
             value: COLLECTION_HELPERS.collectionCreationFee()

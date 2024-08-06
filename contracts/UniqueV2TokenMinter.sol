@@ -27,9 +27,9 @@ abstract contract UniqueV2TokenMinter {
      */
     function _createToken(
         address _collectionAddress,
-        CrossAddress memory _to,
         string memory _image,
-        Attribute[] memory _attributes
+        Attribute[] memory _attributes,
+        CrossAddress memory _to
     ) internal returns (uint256) {
         UniqueNFT nft = UniqueNFT(_collectionAddress);
 
