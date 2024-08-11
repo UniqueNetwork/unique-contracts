@@ -28,3 +28,4 @@ ignition/deployments/chain-31337
 /out
 out.json
 /cache_forge
+.gas-snapshot
