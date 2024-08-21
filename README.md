@@ -6,6 +6,16 @@ This repository contains example smart contracts for minting collections and tok
 
 **DISCLAIMER**: These contracts are provided as examples and are not production-ready yet.
 
+## Install
+
+With Foundry
+
+```sh
+forge install UniqueNetwork/unique-contracts
+```
+
+When working with Hardhat projects, you'll need to copy the entire contracts directory and manually install `@unique-nft/solidity-interfaces`. This process is going to be refined shortly.
+
 ## Contract Description
 
 ### Contracts
