@@ -15,11 +15,7 @@ library AttributeUtils {
     ) internal pure returns (bytes memory) {
         bytes memory newValueBytes = bytes(_newValue);
 
-        bytes memory key = abi.encodePacked(
-            '"trait_type":"',
-            _traitType,
-            '","value":"'
-        );
+        bytes memory key = abi.encodePacked('"trait_type":"', _traitType, '","value":"');
         uint keyLength = key.length;
         uint strLength = _str.length;
         uint i = 0;
@@ -51,9 +47,7 @@ library AttributeUtils {
         }
 
         // Create a new string with the new value
-        bytes memory result = new bytes(
-            strLength - oldValueLen + newValueBytes.length
-        );
+        bytes memory result = new bytes(strLength - oldValueLen + newValueBytes.length);
         uint pos = 0;
 
         // Copy the part before the key
@@ -84,11 +78,7 @@ library AttributeUtils {
         bytes memory _str,
         string memory _traitType
     ) internal pure returns (bytes memory) {
-        bytes memory key = abi.encodePacked(
-            '"trait_type":"',
-            _traitType,
-            '","value":"'
-        );
+        bytes memory key = abi.encodePacked('"trait_type":"', _traitType, '","value":"');
         uint keyLength = key.length;
         uint strLength = _str.length;
         uint i = 0;
@@ -123,12 +113,7 @@ library AttributeUtils {
                 }
 
                 // Handle surrounding curly braces
-                if (
-                    traitStart > 0 &&
-                    _str[traitStart - 1] == "{" &&
-                    traitEnd < strLength &&
-                    _str[traitEnd] == "}"
-                ) {
+                if (traitStart > 0 && _str[traitStart - 1] == "{" && traitEnd < strLength && _str[traitEnd] == "}") {
                     traitStart--;
                     traitEnd++;
                 }
@@ -139,9 +124,7 @@ library AttributeUtils {
                 }
 
                 // Step 3: Copy the remaining parts into a new bytes array
-                bytes memory result = new bytes(
-                    strLength - (traitEnd - traitStart)
-                );
+                bytes memory result = new bytes(strLength - (traitEnd - traitStart));
                 uint pos = 0;
 
                 // Copy before the trait
@@ -177,9 +160,7 @@ library AttributeUtils {
                     // Replace double commas with a single one
                     for (uint j = 1; j < result.length; j++) {
                         if (result[j] == "," && result[j - 1] == ",") {
-                            bytes memory finalResult = new bytes(
-                                result.length - 1
-                            );
+                            bytes memory finalResult = new bytes(result.length - 1);
                             for (uint k = 0; k < j - 1; k++) {
                                 finalResult[k] = result[k];
                             }

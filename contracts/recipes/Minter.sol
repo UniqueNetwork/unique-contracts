@@ -46,22 +46,12 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         string memory _symbol,
         string memory _collectionCover
     ) external payable returns (address) {
-        address collectionAddress = _createCollection(
-            _name,
-            _description,
-            _symbol,
-            _collectionCover,
-            new CollectionLimitValue[](0),
-            new Property[](0),
-            new TokenPropertyPermission[](0)
-        );
+        address collectionAddress = _createCollection(_name, _description, _symbol, _collectionCover);
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
 
         // Set collection sponsorship to the contract address
-        collection.setCollectionSponsorCross(
-            CrossAddress({eth: address(this), sub: 0})
-        );
+        collection.setCollectionSponsorCross(CrossAddress({eth: address(this), sub: 0}));
         // Confirm the collection sponsorship
         collection.confirmCollectionSponsorship();
         // Sponsor every transaction
@@ -69,14 +59,10 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         // Set this contract as an admin
         // Because the minted collection will be owned by the user this contract
         // has to be set as a collection admin in order to be able to mint NFTs
-        collection.addCollectionAdminCross(
-            CrossAddress({eth: address(this), sub: 0})
-        );
+        collection.addCollectionAdminCross(CrossAddress({eth: address(this), sub: 0}));
 
         // Transfer ownership of the collection to the contract caller
-        collection.changeCollectionOwnerCross(
-            CrossAddress({eth: msg.sender, sub: 0})
-        );
+        collection.changeCollectionOwnerCross(CrossAddress({eth: msg.sender, sub: 0}));
 
         emit CollectionCreated(collectionAddress);
 
@@ -89,16 +75,7 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * @param _image URL of the token image.
      * @param _attributes Array of attributes for the token.
      */
-    function mintToken(
-        address collectionAddress,
-        string memory _image,
-        Attribute[] memory _attributes
-    ) external {
-        _createToken(
-            collectionAddress,
-            _image,
-            _attributes,
-            CrossAddress({eth: msg.sender, sub: 0})
-        );
+    function mintToken(address collectionAddress, string memory _image, Attribute[] memory _attributes) external {
+        _createToken(collectionAddress, _image, _attributes, CrossAddress({eth: msg.sender, sub: 0}));
     }
 }

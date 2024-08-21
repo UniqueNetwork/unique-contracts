@@ -37,46 +37,31 @@ contract RemoveTraitTest is Test {
     }
 
     function test_RemoveTraitFromTheBeginning() public view {
-        bytes memory newAttributes = attributesManager.removeTrait(
-            attributes,
-            "age"
-        );
+        bytes memory newAttributes = attributesManager.removeTrait(attributes, "age");
 
         assertEq(newAttributes, EXPECTED_ATTR_REMOVE_BEGINNING);
     }
 
     function test_RemoveTraitFromTheMiddle() public view {
-        bytes memory newAttributes = attributesManager.removeTrait(
-            attributes,
-            "power"
-        );
+        bytes memory newAttributes = attributesManager.removeTrait(attributes, "power");
 
         assertEq(newAttributes, EXPECTED_ATTR_REMOVE_MID);
     }
 
     function test_RemoveTraitFromTheEnd() public view {
-        bytes memory newAttributes = attributesManager.removeTrait(
-            attributes,
-            "name"
-        );
+        bytes memory newAttributes = attributesManager.removeTrait(attributes, "name");
 
         assertEq(newAttributes, EXPECTED_ATTR_REMOVE_END);
     }
 
     function test_RemoveTraitArray() public view {
-        bytes memory newAttributes = attributesManager.removeTrait(
-            attributes,
-            "array"
-        );
+        bytes memory newAttributes = attributesManager.removeTrait(attributes, "array");
 
         assertEq(newAttributes, EXPECTED_ATTR_REMOVE_ARR);
     }
 
     function test_RemoveTraitObject() public view {
-        bytes memory newAttributes = attributesManager.removeTrait(
-            attributes,
-            "object"
-        );
+        bytes memory newAttributes = attributesManager.removeTrait(attributes, "object");
 
         assertEq(newAttributes, EXPECTED_ATTR_REMOVE_OBJ);
     }

@@ -6,10 +6,7 @@ import "../libraries/AttributeUtils.sol";
 contract Test__AttributesManager {
     using AttributeUtils for *;
 
-    function removeTrait(
-        bytes memory _attributes,
-        string memory _trait
-    ) public pure returns (bytes memory) {
+    function removeTrait(bytes memory _attributes, string memory _trait) public pure returns (bytes memory) {
         return _attributes._dangerDosPossible_removeTrait(_trait);
     }
 

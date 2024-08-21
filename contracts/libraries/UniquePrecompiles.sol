@@ -8,6 +8,5 @@ abstract contract UniquePrecompiles {
     CollectionHelpers internal constant COLLECTION_HELPERS =
         CollectionHelpers(0x6C4E9fE1AE37a41E93CEE429e8E1881aBdcbb54F);
 
-    ContractHelpers internal constant CONTRACT_HELPERS =
-        ContractHelpers(0x842899ECF380553E8a4de75bF534cdf6fBF64049);
+    ContractHelpers internal constant CONTRACT_HELPERS = ContractHelpers(0x842899ECF380553E8a4de75bF534cdf6fBF64049);
 }

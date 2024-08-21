@@ -37,41 +37,25 @@ contract SetTraitTest is Test {
     }
 
     function test_SetTraitFromBeginning() public view {
-        bytes memory newAttributes = attributesManager.setTrait(
-            attributes,
-            "age",
-            "12"
-        );
+        bytes memory newAttributes = attributesManager.setTrait(attributes, "age", "12");
 
         assertEq(newAttributes, EXPECTED_ATTR_SET_BEGINNING);
     }
 
     function test_SetTraitFromTheMiddle() public view {
-        bytes memory newAttributes = attributesManager.setTrait(
-            attributes,
-            "power",
-            "42"
-        );
+        bytes memory newAttributes = attributesManager.setTrait(attributes, "power", "42");
 
         assertEq(newAttributes, EXPECTED_ATTR_SET_MID);
     }
 
     function test_SetTraitFromTheEnd() public view {
-        bytes memory newAttributes = attributesManager.setTrait(
-            attributes,
-            "name",
-            "Alex"
-        );
+        bytes memory newAttributes = attributesManager.setTrait(attributes, "name", "Alex");
 
         assertEq(newAttributes, EXPECTED_ATTR_SET_END);
     }
 
     function test_SetTraitArray() public view {
-        bytes memory newAttributes = attributesManager.setTrait(
-            attributes,
-            "array",
-            '["completely","new"]'
-        );
+        bytes memory newAttributes = attributesManager.setTrait(attributes, "array", '["completely","new"]');
 
         assertEq(newAttributes, EXPECTED_ATTR_SET_ARR);
     }

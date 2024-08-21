@@ -20,55 +20,29 @@ library UniqueV2Metadata {
         bool _defaultCollectionAdmin
     ) internal pure returns (TokenPropertyPermission[] memory) {
         uint256 tppLength = _customTPPs.length + 8;
-        TokenPropertyPermission[]
-            memory extendedTPPs = new TokenPropertyPermission[](tppLength);
+        TokenPropertyPermission[] memory extendedTPPs = new TokenPropertyPermission[](tppLength);
 
-        PropertyPermission[]
-            memory defaultTPP = getDefaultTokenPropertyPermission(
-                _defaultMutable,
-                _defaultTokenOwner,
-                _defaultCollectionAdmin
-            );
+        PropertyPermission[] memory defaultTPP = getDefaultTokenPropertyPermission(
+            _defaultMutable,
+            _defaultTokenOwner,
+            _defaultCollectionAdmin
+        );
 
-        extendedTPPs[0] = TokenPropertyPermission({
-            key: "URI",
-            permissions: defaultTPP
-        });
+        extendedTPPs[0] = TokenPropertyPermission({key: "URI", permissions: defaultTPP});
 
-        extendedTPPs[1] = TokenPropertyPermission({
-            key: "URISuffix",
-            permissions: defaultTPP
-        });
+        extendedTPPs[1] = TokenPropertyPermission({key: "URISuffix", permissions: defaultTPP});
 
-        extendedTPPs[2] = TokenPropertyPermission({
-            key: "customizing_overrides",
-            permissions: defaultTPP
-        });
+        extendedTPPs[2] = TokenPropertyPermission({key: "customizing_overrides", permissions: defaultTPP});
 
-        extendedTPPs[3] = TokenPropertyPermission({
-            key: "overrides",
-            permissions: defaultTPP
-        });
+        extendedTPPs[3] = TokenPropertyPermission({key: "overrides", permissions: defaultTPP});
 
-        extendedTPPs[4] = TokenPropertyPermission({
-            key: "royalties",
-            permissions: defaultTPP
-        });
+        extendedTPPs[4] = TokenPropertyPermission({key: "royalties", permissions: defaultTPP});
 
-        extendedTPPs[5] = TokenPropertyPermission({
-            key: "schemaName",
-            permissions: defaultTPP
-        });
+        extendedTPPs[5] = TokenPropertyPermission({key: "schemaName", permissions: defaultTPP});
 
-        extendedTPPs[6] = TokenPropertyPermission({
-            key: "schemaVersion",
-            permissions: defaultTPP
-        });
+        extendedTPPs[6] = TokenPropertyPermission({key: "schemaVersion", permissions: defaultTPP});
 
-        extendedTPPs[7] = TokenPropertyPermission({
-            key: "tokenData",
-            permissions: defaultTPP
-        });
+        extendedTPPs[7] = TokenPropertyPermission({key: "tokenData", permissions: defaultTPP});
 
         // Add custom tokenPropertyPermissions permissions
         for (uint256 i = 0; i < _customTPPs.length; i++) {
@@ -95,19 +69,12 @@ library UniqueV2Metadata {
         propertiesV2[0] = Property({key: "schemaName", value: "unique"});
         propertiesV2[1] = Property({key: "schemaVersion", value: "2.0.0"});
 
-        string
-            memory collectionInfoPart1 = '{"schemaName":"unique","schemaVersion":"2.0.0","cover_image":{"url":"';
+        string memory collectionInfoPart1 = '{"schemaName":"unique","schemaVersion":"2.0.0","cover_image":{"url":"';
         string memory collectionInfoPart2 = '"}}';
 
         propertiesV2[2] = Property({
             key: "collectionInfo",
-            value: bytes(
-                string.concat(
-                    collectionInfoPart1,
-                    coverImage,
-                    collectionInfoPart2
-                )
-            )
+            value: bytes(string.concat(collectionInfoPart1, coverImage, collectionInfoPart2))
         });
 
         // set custom collection properties
@@ -123,8 +90,7 @@ library UniqueV2Metadata {
         bool _defaultTokenOwner,
         bool _defaultCollectionAdmin
     ) private pure returns (PropertyPermission[] memory) {
-        PropertyPermission[]
-            memory defaultPropertyPermissions = new PropertyPermission[](3);
+        PropertyPermission[] memory defaultPropertyPermissions = new PropertyPermission[](3);
 
         defaultPropertyPermissions[0] = PropertyPermission({
             code: TokenPermissionField.Mutable,
