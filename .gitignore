@@ -23,3 +23,9 @@ ignition/deployments/chain-31337
 # Remix
 .states
 /contracts/artifacts
+
+# Foundry
+/out
+out.json
+/cache_forge
+.gas-snapshot

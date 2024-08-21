@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
+import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import "./libraries/UniquePrecompiles.sol";
 import "./libraries/UniqueV2Metadata.sol";
 
@@ -21,6 +21,43 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     constructor(bool _mutable, bool _tokenOwner, bool _admin) {}
 
     /**
+     * @dev Internal function to create a new collection with default settings.
+     *
+     * This function simplifies the process of creating a new collection by using default values for
+     * nesting and permission settings, as well as empty arrays for limits, properties, and token property
+     * permissions. It returns the address of the newly created collection.
+     *
+     * @param _name The name of the collection to be created.
+     * @param _description A brief description of the collection.
+     * @param _symbol The symbol prefix that will be used for the tokens in this collection.
+     * @param _collectionCover A URL pointing to the cover image of the collection.
+     *
+     * @return address The address of the newly created collection.
+     */
+    function _createCollection(
+        string memory _name,
+        string memory _description,
+        string memory _symbol,
+        string memory _collectionCover
+    ) internal returns (address) {
+        return
+            _createCollection(
+                _name,
+                _description,
+                _symbol,
+                _collectionCover,
+                CollectionNestingAndPermission({
+                    token_owner: true,
+                    collection_admin: true,
+                    restricted: new address[](0)
+                }),
+                new CollectionLimitValue[](0),
+                new Property[](0),
+                new TokenPropertyPermission[](0)
+            );
+    }
+
+    /**
      * @dev Internal function to create a new collection.
      * @param _name Name of the collection.
      * @param _description Description of the collection.
@@ -35,10 +72,10 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         string memory _description,
         string memory _symbol,
         string memory _collectionCover,
+        CollectionNestingAndPermission memory nesting_settings,
         CollectionLimitValue[] memory _limits,
         Property[] memory _customCollectionProperties,
         // CollectionMode mode,
-        // CollectionNestingAndPermission nesting_settings,
         // CrossAddress memory _pending_sponsor,
         TokenPropertyPermission[] memory _customTokenPropertyPermissions
     ) internal returns (address) {
@@ -48,14 +85,17 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.mode = CollectionMode.Nonfungible;
         data.token_prefix = _symbol;
         data.limits = _limits;
-        data.token_property_permissions = _customTokenPropertyPermissions
-            .withUniqueV2TokenPropertyPermissions(true, false, true);
-        data.properties = _customCollectionProperties
-            .withUniqueV2CollectionProperties(_collectionCover);
+        data.nesting_settings = nesting_settings;
+        data.token_property_permissions = _customTokenPropertyPermissions.withUniqueV2TokenPropertyPermissions(
+            true,
+            false,
+            true
+        );
+        data.properties = _customCollectionProperties.withUniqueV2CollectionProperties(_collectionCover);
 
-        address collection = COLLECTION_HELPERS.createCollection{
-            value: COLLECTION_HELPERS.collectionCreationFee()
-        }(data);
+        address collection = COLLECTION_HELPERS.createCollection{value: COLLECTION_HELPERS.collectionCreationFee()}(
+            data
+        );
         return collection;
     }
 }

@@ -33,10 +33,7 @@ abstract contract UniqueV2TokenMinter {
     ) internal returns (uint256) {
         UniqueNFT nft = UniqueNFT(_collectionAddress);
 
-        Property memory tokenData = Property({
-            key: "tokenData",
-            value: _tokenDataBuilder(_attributes, _image)
-        });
+        Property memory tokenData = Property({key: "tokenData", value: _tokenDataBuilder(_attributes, _image)});
 
         Property[] memory properties = new Property[](3);
         properties[0] = Property({key: "schemaName", value: "unique"});
@@ -56,13 +53,8 @@ abstract contract UniqueV2TokenMinter {
         Attribute[] memory _attributes,
         string memory _image
     ) private pure returns (bytes memory) {
-        string
-            memory tokenData1 = '{"schemaName":"unique","schemaVersion":"2.0.0","image":"';
-        string memory tokenData2 = string.concat(
-            '",',
-            _attributesBuilder(_attributes),
-            "}"
-        );
+        string memory tokenData1 = '{"schemaName":"unique","schemaVersion":"2.0.0","image":"';
+        string memory tokenData2 = string.concat('",', _attributesBuilder(_attributes), "}");
 
         return bytes(string.concat(tokenData1, _image, tokenData2));
     }
@@ -72,9 +64,7 @@ abstract contract UniqueV2TokenMinter {
      * @param _attributes Array of attributes for the token.
      * @return Attributes JSON string.
      */
-    function _attributesBuilder(
-        Attribute[] memory _attributes
-    ) private pure returns (string memory) {
+    function _attributesBuilder(Attribute[] memory _attributes) private pure returns (string memory) {
         string memory attributesString = '"attributes":[';
         for (uint i = 0; i < _attributes.length; i++) {
             attributesString = string.concat(
