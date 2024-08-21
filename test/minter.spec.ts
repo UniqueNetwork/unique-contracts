@@ -6,26 +6,27 @@ import { expect } from "chai";
 import testConfig from "./utils/config";
 
 it("Can mint collection for free and mint tokens for free after that", async () => {
-  const [collectionOwner, user] = await ethers.getSigners();
+  const [minterOwner] = await ethers.getSigners();
+  const user = ethers.Wallet.createRandom(ethers.provider);
 
-  console.log(await ethers.provider.getBalance(collectionOwner));
+  console.log(await ethers.provider.getBalance(minterOwner));
 
   // NOTE: get user's balance before minting
   // user will send transactions but for *free*
   const userBalanceBefore = await ethers.provider.getBalance(user);
   console.log(userBalanceBefore);
 
-  // NOTE: collectionOwner deploy Minter contract
+  // NOTE: minterOwner deploy Minter contract
   const MinterFactory = await ethers.getContractFactory("Minter");
-  const minter = await MinterFactory.connect(collectionOwner).deploy({
+  const minter = await MinterFactory.connect(minterOwner).deploy({
     gasLimit: 3000_000,
-    value: parseEther("30"),
+    value: parseEther("100"),
   });
   await minter.waitForDeployment();
   const minterAddress = await minter.getAddress();
 
-  // NOTE: collectionOwner sets self-sponsorship for the contract
-  const contractHelpers = testConfig.contractHelpers.connect(collectionOwner);
+  // NOTE: minterOwner sets self-sponsorship for the contract
+  const contractHelpers = testConfig.contractHelpers.connect(minterOwner);
   await contractHelpers.selfSponsoredEnable(minter, { gasLimit: 300_000 });
   // Set rate limit 0 (every tx will be sponsored)
   await contractHelpers.setSponsoringRateLimit(minter, 0, {
@@ -43,15 +44,15 @@ it("Can mint collection for free and mint tokens for free after that", async () 
 
   // NOTE: user mints collection for free!
   // This collection will be automatically sponsored by Minter
-  const mintCollectionTx = await minter
-    .connect(user)
-    .mintCollection(
-      "N",
-      "NN",
-      "NNN",
-      "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmQRUMbyfvioTcYiJYorEK6vNT3iN4pM6Sci9A2gQBuwuA",
-      { gasLimit: 2000_000 },
-    );
+  const mintCollectionTx = await minter.connect(user).mintCollection(
+    "N",
+    "NN",
+    "NNN",
+    "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmQRUMbyfvioTcYiJYorEK6vNT3iN4pM6Sci9A2gQBuwuA",
+    { token_owner: true, collection_admin: true, restricted: [] },
+    // CrossAddress: user sets its ethereum address as a collection owner
+    { eth: user.address, sub: 0 },
+  );
 
   const receipt = await mintCollectionTx.wait();
   if (!receipt) throw Error("No receipt");
@@ -69,6 +70,8 @@ it("Can mint collection for free and mint tokens for free after that", async () 
       event.args.collectionAddress,
       "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmY7hbSNiwE3ApYp83CHWFdqrcEAM6AvChucBVA6kC1e8u",
       [{ trait_type: "Power", value: "42" }],
+      // CrossAddress: user sets its own address as a token owner
+      { eth: user.address, sub: 0 },
       { gasLimit: 300000 },
     )
     .then((tx) => tx.wait());

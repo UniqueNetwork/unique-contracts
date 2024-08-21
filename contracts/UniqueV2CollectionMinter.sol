@@ -20,6 +20,20 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
      */
     constructor(bool _mutable, bool _tokenOwner, bool _admin) {}
 
+    /**
+     * @dev Internal function to create a new collection with default settings.
+     *
+     * This function simplifies the process of creating a new collection by using default values for
+     * nesting and permission settings, as well as empty arrays for limits, properties, and token property
+     * permissions. It returns the address of the newly created collection.
+     *
+     * @param _name The name of the collection to be created.
+     * @param _description A brief description of the collection.
+     * @param _symbol The symbol prefix that will be used for the tokens in this collection.
+     * @param _collectionCover A URL pointing to the cover image of the collection.
+     *
+     * @return address The address of the newly created collection.
+     */
     function _createCollection(
         string memory _name,
         string memory _description,
@@ -71,6 +85,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.mode = CollectionMode.Nonfungible;
         data.token_prefix = _symbol;
         data.limits = _limits;
+        data.nesting_settings = nesting_settings;
         data.token_property_permissions = _customTokenPropertyPermissions.withUniqueV2TokenPropertyPermissions(
             true,
             false,

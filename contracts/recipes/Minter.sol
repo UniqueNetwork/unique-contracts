@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {UniqueNFT} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
-import {Property, CollectionLimitValue} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
+import {UniqueNFT, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
+import {Property, CollectionLimitValue, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import {UniqueV2CollectionMinter, CollectionMode, TokenPropertyPermission} from "../UniqueV2CollectionMinter.sol";
 import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMinter.sol";
 
@@ -17,8 +17,16 @@ import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMint
  * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/minter.spec.ts
  */
 contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+    /// @dev track collection owners to restrict minting
+    mapping(address collection => address owner) private s_collectionOwner;
+
     /// @dev Event emitted when a new collection is created.
     event CollectionCreated(address collectionAddress);
+
+    modifier onlyCollectionOwner(address _collectionAddress) {
+        require(msg.sender == s_collectionOwner[_collectionAddress]);
+        _;
+    }
 
     /**
      * @dev Constructor that sets default property permissions and allows the contract to receive UNQ.
@@ -38,15 +46,27 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * @param _description Description of the collection.
      * @param _symbol Symbol prefix for the tokens in the collection.
      * @param _collectionCover URL of the cover image for the collection.
+     * @param _owner Owner of the collection
      * @return Address of the created collection.
      */
     function mintCollection(
         string memory _name,
         string memory _description,
         string memory _symbol,
-        string memory _collectionCover
+        string memory _collectionCover,
+        CollectionNestingAndPermission memory nesting_settings,
+        CrossAddress memory _owner
     ) external payable returns (address) {
-        address collectionAddress = _createCollection(_name, _description, _symbol, _collectionCover);
+        address collectionAddress = _createCollection(
+            _name,
+            _description,
+            _symbol,
+            _collectionCover,
+            nesting_settings,
+            new CollectionLimitValue[](0),
+            new Property[](0),
+            new TokenPropertyPermission[](0)
+        );
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
 
@@ -62,7 +82,8 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         collection.addCollectionAdminCross(CrossAddress({eth: address(this), sub: 0}));
 
         // Transfer ownership of the collection to the contract caller
-        collection.changeCollectionOwnerCross(CrossAddress({eth: msg.sender, sub: 0}));
+        collection.changeCollectionOwnerCross(_owner);
+        s_collectionOwner[collectionAddress] = msg.sender;
 
         emit CollectionCreated(collectionAddress);
 
@@ -71,11 +92,17 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
 
     /**
      * @dev Function to mint a new token within a collection.
-     * @param collectionAddress Address of the collection in which to mint the token. The contract should be an admin for the collection
+     * @param _collectionAddress Address of the collection in which to mint the token. The contract should be an admin for the collection
      * @param _image URL of the token image.
      * @param _attributes Array of attributes for the token.
+     * @param _tokenOwner Owner of the token
      */
-    function mintToken(address collectionAddress, string memory _image, Attribute[] memory _attributes) external {
-        _createToken(collectionAddress, _image, _attributes, CrossAddress({eth: msg.sender, sub: 0}));
+    function mintToken(
+        address _collectionAddress,
+        string memory _image,
+        Attribute[] memory _attributes,
+        CrossAddress memory _tokenOwner
+    ) external onlyCollectionOwner(_collectionAddress) {
+        _createToken(_collectionAddress, _image, _attributes, _tokenOwner);
     }
 }
