@@ -2,4 +2,5 @@
 @unique-nft/=node_modules/@unique-nft/
 eth-gas-reporter/=node_modules/eth-gas-reporter/
 forge-std/=lib/forge-std/src/
+solidity-stringutils/=lib/solidity-stringutils/src/
 hardhat/=node_modules/hardhat/

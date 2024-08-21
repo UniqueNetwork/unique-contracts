@@ -1,21 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-library AttributesManager {
-    function setTraitValue(
-        bytes memory str,
-        string memory traitType,
-        string memory newValue
-    ) internal pure returns (string memory) {
-        bytes memory newValueBytes = bytes(newValue);
+library AttributeUtils {
+    /// @notice Sets a new trait value in the provided attribute.
+    /// @dev DANGER: This method can be very gas-consuming, especially with large JSON strings, and could potentially lead to a denial of service (DOS) if used improperly.
+    /// @param _str The original tokenData.
+    /// @param _traitType The trait type whose value needs to be updated.
+    /// @param _newValue The new value to set for the specified trait type.
+    /// @return The updated tokenData string with the new trait value.
+    function _dangerDosPossible_setTraitValue(
+        bytes memory _str,
+        string memory _traitType,
+        string memory _newValue
+    ) internal pure returns (bytes memory) {
+        bytes memory newValueBytes = bytes(_newValue);
 
         bytes memory key = abi.encodePacked(
             '"trait_type":"',
-            traitType,
+            _traitType,
             '","value":"'
         );
         uint keyLength = key.length;
-        uint strLength = str.length;
+        uint strLength = _str.length;
         uint i = 0;
         uint oldValueLen = 0;
 
@@ -23,7 +29,7 @@ library AttributesManager {
         for (i = 0; i <= strLength - keyLength; i++) {
             bool matchFound = true;
             for (uint j = 0; j < keyLength; j++) {
-                if (str[i + j] != key[j]) {
+                if (_str[i + j] != key[j]) {
                     matchFound = false;
                     break;
                 }
@@ -31,7 +37,7 @@ library AttributesManager {
             if (matchFound) {
                 // Find the old value length
                 uint k = i + keyLength;
-                while (k < strLength && str[k] != '"') {
+                while (k < strLength && _str[k] != '"') {
                     oldValueLen++;
                     k++;
                 }
@@ -41,7 +47,7 @@ library AttributesManager {
 
         // If no match is found, return original string
         if (i > strLength - keyLength) {
-            return string(str);
+            return _str;
         }
 
         // Create a new string with the new value
@@ -52,7 +58,7 @@ library AttributesManager {
 
         // Copy the part before the key
         for (uint j = 0; j < i + keyLength; j++) {
-            result[pos++] = str[j];
+            result[pos++] = _str[j];
         }
 
         // Copy the new value
@@ -62,31 +68,36 @@ library AttributesManager {
 
         // Copy the rest of the original string after the old value
         for (uint j = i + keyLength + oldValueLen; j < strLength; j++) {
-            result[pos++] = str[j];
+            result[pos++] = _str[j];
         }
 
         // Return the new string
-        return string(result);
+        return result;
     }
 
-    function removeTrait(
-        bytes memory str,
-        string memory traitType
+    /// @notice Removes a specified trait from the provided attributes.
+    /// @dev DANGER: This method can be very gas-consuming, especially with large JSON strings, and could potentially lead to a denial of service (DOS) if used improperly.
+    /// @param _str The original tokenData.
+    /// @param _traitType The trait type to be removed.
+    /// @return The updated tokenData string with the specified trait removed.
+    function _dangerDosPossible_removeTrait(
+        bytes memory _str,
+        string memory _traitType
     ) internal pure returns (bytes memory) {
         bytes memory key = abi.encodePacked(
             '"trait_type":"',
-            traitType,
+            _traitType,
             '","value":"'
         );
         uint keyLength = key.length;
-        uint strLength = str.length;
+        uint strLength = _str.length;
         uint i = 0;
 
         // Step 1: Find the trait in the string
         for (i = 0; i <= strLength - keyLength; i++) {
             bool matchFound = true;
             for (uint j = 0; j < keyLength; j++) {
-                if (str[i + j] != key[j]) {
+                if (_str[i + j] != key[j]) {
                     matchFound = false;
                     break;
                 }
@@ -96,27 +107,27 @@ library AttributesManager {
                 uint k = i + keyLength;
 
                 // Find the end of the value string
-                while (k < strLength && str[k] != '"') {
+                while (k < strLength && _str[k] != '"') {
                     k++;
                 }
                 uint traitEnd = k + 1;
 
                 // Step 2: Adjust for commas and braces
                 // Handle trailing comma
-                if (traitEnd < strLength && str[traitEnd] == ",") {
+                if (traitEnd < strLength && _str[traitEnd] == ",") {
                     traitEnd++;
                 }
                 // Handle leading comma
-                else if (traitStart > 0 && str[traitStart - 1] == ",") {
+                else if (traitStart > 0 && _str[traitStart - 1] == ",") {
                     traitStart--;
                 }
 
                 // Handle surrounding curly braces
                 if (
                     traitStart > 0 &&
-                    str[traitStart - 1] == "{" &&
+                    _str[traitStart - 1] == "{" &&
                     traitEnd < strLength &&
-                    str[traitEnd] == "}"
+                    _str[traitEnd] == "}"
                 ) {
                     traitStart--;
                     traitEnd++;
@@ -135,12 +146,12 @@ library AttributesManager {
 
                 // Copy before the trait
                 for (uint j = 0; j < traitStart; j++) {
-                    result[pos++] = str[j];
+                    result[pos++] = _str[j];
                 }
 
                 // Copy after the trait
                 for (uint j = traitEnd; j < strLength; j++) {
-                    result[pos++] = str[j];
+                    result[pos++] = _str[j];
                 }
 
                 // Step 4: Remove any double commas
@@ -186,6 +197,6 @@ library AttributesManager {
         }
 
         // If no match is found, return the original string
-        return str;
+        return _str;
     }
 }

@@ -1,15 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import "../libraries/AttributesManager.sol";
+import "../libraries/AttributeUtils.sol";
 
 contract Test__AttributesManager {
-    using AttributesManager for *;
+    using AttributeUtils for *;
 
-    function removeAttribute(
+    function removeTrait(
         bytes memory _attributes,
         string memory _trait
     ) public pure returns (bytes memory) {
-        return _attributes.removeTrait(_trait);
+        return _attributes._dangerDosPossible_removeTrait(_trait);
+    }
+
+    function setTrait(
+        bytes memory _str,
+        string memory _traitType,
+        string memory _newValue
+    ) public pure returns (bytes memory) {
+        return _str._dangerDosPossible_setTraitValue(_traitType, _newValue);
     }
 }
