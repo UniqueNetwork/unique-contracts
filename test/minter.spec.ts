@@ -5,8 +5,9 @@ import { Address } from "@unique-nft/utils";
 import { expect } from "chai";
 import testConfig from "./utils/config";
 
-it("Can mint collection for free and mint tokens for free after that", async () => {
+it("EVM: Can mint collection for free and mint tokens for free after that", async () => {
   const [minterOwner] = await ethers.getSigners();
+
   const user = ethers.Wallet.createRandom(ethers.provider);
 
   console.log(await ethers.provider.getBalance(minterOwner));
@@ -27,13 +28,19 @@ it("Can mint collection for free and mint tokens for free after that", async () 
 
   // NOTE: minterOwner sets self-sponsorship for the contract
   const contractHelpers = testConfig.contractHelpers.connect(minterOwner);
-  await contractHelpers.selfSponsoredEnable(minter, { gasLimit: 300_000 });
+  await contractHelpers
+    .selfSponsoredEnable(minter, { gasLimit: 300_000 })
+    .then((tx) => tx.wait());
   // Set rate limit 0 (every tx will be sponsored)
-  await contractHelpers.setSponsoringRateLimit(minter, 0, {
-    gasLimit: 300_000,
-  });
+  await contractHelpers
+    .setSponsoringRateLimit(minter, 0, {
+      gasLimit: 300_000,
+    })
+    .then((tx) => tx.wait());
   // Set generous mode (all users sponsored)
-  await contractHelpers.setSponsoringMode(minter, 2, { gasLimit: 300_000 });
+  await contractHelpers
+    .setSponsoringMode(minter, 2, { gasLimit: 300_000 })
+    .then((tx) => tx.wait());
 
   // Log Minter's address
   console.log(
@@ -52,6 +59,7 @@ it("Can mint collection for free and mint tokens for free after that", async () 
     { token_owner: true, collection_admin: true, restricted: [] },
     // CrossAddress: user sets its ethereum address as a collection owner
     { eth: user.address, sub: 0 },
+    { gasLimit: 300_000 },
   );
 
   const receipt = await mintCollectionTx.wait();
