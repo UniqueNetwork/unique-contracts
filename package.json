@@ -11,7 +11,6 @@
     "codestyle": "prettier . --write"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.2",
     "@unique-nft/sdk": "^0.7.7",
     "@unique-nft/utils": "^0.3.20",
     "dotenv": "^16.4.5"

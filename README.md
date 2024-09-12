@@ -4,8 +4,6 @@
 
 This repository contains example smart contracts for minting collections and tokens in the [Unique Schema V2](https://docs.uniquenetwork.dev/reference/schemas) using Solidity.
 
-**DISCLAIMER**: These contracts are provided as examples and are not production-ready yet.
-
 ## Install
 
 With Foundry

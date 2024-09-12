@@ -7,7 +7,7 @@ import testConfig from "./utils/config";
 import { Sr25519Account } from "@unique-nft/sdk/sr25519";
 import { Sdk } from "@unique-nft/sdk/full";
 
-it("Can mint collection for free and mint tokens for free after that", async () => {
+it("Substrate: Can mint collection for free and mint tokens for free after that", async () => {
   const [minterOwner] = await ethers.getSigners();
 
   // Generate an empty account
