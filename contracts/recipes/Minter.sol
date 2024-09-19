@@ -33,10 +33,10 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * This contract sponsors every collection and token minting which is why it should have a balance of UNQ
      * Sets properties as
      * - mutable
-     * - token owner has no default permissions to change properties
-     * - collectionAdmin has default permissions to change properties.
+     * - collectionAdmin has permissions to change properties.
+     * - token owner has no permissions to change properties
      */
-    constructor() payable UniqueV2CollectionMinter(true, false, true) {}
+    constructor() payable UniqueV2CollectionMinter(true, true, false) {}
 
     receive() external payable {}
 

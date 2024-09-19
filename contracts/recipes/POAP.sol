@@ -54,11 +54,11 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * This contract sponsors every collection and token minting, which is why it should have a balance of UNQ.
      * Sets properties as:
      * - mutable
-     * - token owner has no permissions to change properties
      * - collection admin has permissions to change properties.
+     * - token owner has no permissions to change properties
      * @param _collectionCreationFee The fee required to create a collection.
      */
-    constructor(uint256 _collectionCreationFee) payable UniqueV2CollectionMinter(true, false, true) {
+    constructor(uint256 _collectionCreationFee) payable UniqueV2CollectionMinter(true, true, false) {
         s_collectionCreationFee = _collectionCreationFee;
     }
 

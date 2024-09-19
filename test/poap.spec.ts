@@ -13,6 +13,9 @@ it("POAP contract owner can create event and user without UNQ can mint NFT", asy
 
   // NOTE: expect user has no UNQ tokens
   // user will send transactions but for *free*
+  const collectionOwnerBalance =
+    await ethers.provider.getBalance(collectionOwner);
+  expect(collectionOwnerBalance).gt(100n * 10n ** 18n);
   const userBalanceBefore = await ethers.provider.getBalance(userWithoutUNQ);
   expect(userBalanceBefore).to.deep.eq(0n);
 
@@ -20,7 +23,7 @@ it("POAP contract owner can create event and user without UNQ can mint NFT", asy
   const PoapFactory = await ethers.getContractFactory("POAP");
   const poap = await PoapFactory.connect(collectionOwner).deploy(
     EVENT_CREATION_FEE,
-    { gasLimit: 3000_000, value: POAP_BALANCE },
+    { gasLimit: 3_500_000, value: POAP_BALANCE },
   );
   await poap.waitForDeployment();
   const poapAddress = await poap.getAddress();

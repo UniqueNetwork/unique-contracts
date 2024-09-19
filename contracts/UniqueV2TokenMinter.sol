@@ -33,7 +33,7 @@ abstract contract UniqueV2TokenMinter {
     ) internal returns (uint256) {
         UniqueNFT nft = UniqueNFT(_collectionAddress);
 
-        Property memory tokenData = Property({key: "tokenData", value: _tokenDataBuilder(_attributes, _image)});
+        Property memory tokenData = Property({key: "tokenData", value: _buildTokenData(_attributes, _image)});
 
         Property[] memory properties = new Property[](3);
         properties[0] = Property({key: "schemaName", value: "unique"});
@@ -49,14 +49,15 @@ abstract contract UniqueV2TokenMinter {
      * @param _image URL of the token image.
      * @return Token data JSON string in bytes.
      */
-    function _tokenDataBuilder(
-        Attribute[] memory _attributes,
-        string memory _image
-    ) private pure returns (bytes memory) {
-        string memory tokenData1 = '{"schemaName":"unique","schemaVersion":"2.0.0","image":"';
-        string memory tokenData2 = string.concat('",', _attributesBuilder(_attributes), "}");
-
-        return bytes(string.concat(tokenData1, _image, tokenData2));
+    function _buildTokenData(Attribute[] memory _attributes, string memory _image) private pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '{"schemaName":"unique","schemaVersion":"2.0.0","image":"',
+                _image,
+                '",',
+                _buildAttributes(_attributes),
+                "}"
+            );
     }
 
     /**
@@ -64,11 +65,12 @@ abstract contract UniqueV2TokenMinter {
      * @param _attributes Array of attributes for the token.
      * @return Attributes JSON string.
      */
-    function _attributesBuilder(Attribute[] memory _attributes) private pure returns (string memory) {
-        string memory attributesString = '"attributes":[';
-        for (uint i = 0; i < _attributes.length; i++) {
-            attributesString = string.concat(
-                attributesString,
+    function _buildAttributes(Attribute[] memory _attributes) private pure returns (bytes memory) {
+        bytes memory attributesBytes = '"attributes":[';
+
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            attributesBytes = abi.encodePacked(
+                attributesBytes,
                 '{"trait_type":"',
                 _attributes[i].trait_type,
                 '","value":"',
@@ -76,10 +78,9 @@ abstract contract UniqueV2TokenMinter {
                 '"}'
             );
             if (i < _attributes.length - 1) {
-                attributesString = string.concat(attributesString, ",");
+                attributesBytes = abi.encodePacked(attributesBytes, ",");
             }
         }
-        attributesString = string.concat(attributesString, "]");
-        return attributesString;
+        return abi.encodePacked(attributesBytes, "]");
     }
 }

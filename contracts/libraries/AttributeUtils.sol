@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+/**
+ * @title AttributeUtils
+ * @dev Library for manipulating token attributes.
+ */
 library AttributeUtils {
     /// @notice Sets a new trait value in the provided attribute.
     /// @dev DANGER: This method can be very gas-consuming, especially with large JSON strings, and could potentially lead to a denial of service (DOS) if used improperly.
@@ -8,7 +12,7 @@ library AttributeUtils {
     /// @param _traitType The trait type whose value needs to be updated.
     /// @param _newValue The new value to set for the specified trait type.
     /// @return The updated tokenData string with the new trait value.
-    function _dangerDosPossible_setTraitValue(
+    function dangerSetTraitValue(
         bytes memory _str,
         string memory _traitType,
         string memory _newValue
@@ -74,10 +78,7 @@ library AttributeUtils {
     /// @param _str The original tokenData.
     /// @param _traitType The trait type to be removed.
     /// @return The updated tokenData string with the specified trait removed.
-    function _dangerDosPossible_removeTrait(
-        bytes memory _str,
-        string memory _traitType
-    ) internal pure returns (bytes memory) {
+    function dangerRemoveTrait(bytes memory _str, string memory _traitType) internal pure returns (bytes memory) {
         bytes memory key = abi.encodePacked('"trait_type":"', _traitType, '","value":"');
         uint keyLength = key.length;
         uint strLength = _str.length;
