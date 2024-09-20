@@ -4,6 +4,10 @@ pragma solidity 0.8.24;
 import {CollectionHelpers} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import {ContractHelpers} from "@unique-nft/solidity-interfaces/contracts/ContractHelpers.sol";
 
+/**
+ * @title UniquePrecompiles
+ * @dev Abstract contract to provide access to Unique Network precompiled contracts.
+ */
 abstract contract UniquePrecompiles {
     CollectionHelpers internal constant COLLECTION_HELPERS =
         CollectionHelpers(0x6C4E9fE1AE37a41E93CEE429e8E1881aBdcbb54F);

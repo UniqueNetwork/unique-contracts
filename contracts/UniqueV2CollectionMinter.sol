@@ -5,6 +5,12 @@ import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimit
 import "./libraries/UniquePrecompiles.sol";
 import "./libraries/UniqueV2Metadata.sol";
 
+struct DefaultTokenPropertyPermission {
+    bool isMutable;
+    bool collectionAdmin;
+    bool tokenOwner;
+}
+
 /**
  * @title UniqueV2CollectionMinter
  * @dev Abstract contract for minting collections in the Unique V2 Schema.
@@ -12,20 +18,20 @@ import "./libraries/UniqueV2Metadata.sol";
 abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     using UniqueV2Metadata for *;
 
+    DefaultTokenPropertyPermission private s_defaultTokemPropertyPermissions;
+
     /**
      * @dev Initializes the contract with default property permissions.
      * @param _mutable Boolean indicating if properties are mutable by default.
      * @param _tokenOwner Boolean indicating if the token owner has permissions by default.
      * @param _admin Boolean indicating if the collection admin has permissions by default.
      */
-    constructor(bool _mutable, bool _tokenOwner, bool _admin) {}
+    constructor(bool _mutable, bool _admin, bool _tokenOwner) {
+        s_defaultTokemPropertyPermissions = DefaultTokenPropertyPermission(_mutable, _admin, _tokenOwner);
+    }
 
     /**
      * @dev Internal function to create a new collection with default settings.
-     *
-     * This function simplifies the process of creating a new collection by using default values for
-     * nesting and permission settings, as well as empty arrays for limits, properties, and token property
-     * permissions. It returns the address of the newly created collection.
      *
      * @param _name The name of the collection to be created.
      * @param _description A brief description of the collection.
@@ -86,10 +92,13 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.token_prefix = _symbol;
         data.limits = _limits;
         data.nesting_settings = nesting_settings;
+
+        DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokemPropertyPermissions;
+
         data.token_property_permissions = _customTokenPropertyPermissions.withUniqueV2TokenPropertyPermissions(
-            true,
-            false,
-            true
+            defaultTPPs.isMutable,
+            defaultTPPs.collectionAdmin,
+            defaultTPPs.tokenOwner
         );
         data.properties = _customCollectionProperties.withUniqueV2CollectionProperties(_collectionCover);
 
