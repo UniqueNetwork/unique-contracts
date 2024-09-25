@@ -52,7 +52,7 @@ contract SetTokenDataTest is Test {
         assertEq(newAttributes, EXPECTED_ATTR_SET_NONEXISTENT);
     }
 
-    function test_SetNonExistingTrait_NoTraits() public view {
+    function test_SetNonExistingTraitWhenNoTraits() public view {
         bytes memory TOKEN_DATA_NO_ATTRIBUTES = bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
         );
@@ -75,11 +75,11 @@ contract SetTokenDataTest is Test {
     }
 
     function test_SetTraitWithSpecialCharacters() public view {
-        bytes memory specialValue = bytes('He said "Hello"');
         bytes memory EXPECTED_ATTR_SET_SPECIAL = bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"He said \\"Hello\\""},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
         );
-        bytes memory newAttributes = attributesManager.setTrait(tokenData, "age", specialValue);
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, "age", bytes('He said "Hello"'));
+        console2.logString(string(newAttributes));
 
         assertEq(newAttributes, EXPECTED_ATTR_SET_SPECIAL);
     }
@@ -110,7 +110,7 @@ contract SetTokenDataTest is Test {
 
     function test_SetMultipleTraits() public view {
         bytes memory EXPECTED_ATTR_SET_MULTIPLE = bytes(
-            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com/image.png","attributes":[{"trait_type":"age","value":"30"},{"trait_type":"power","value":"50"},{"trait_type":"name","value":"Alice"},{"trait_type":"nickname","value":"Wonderland"}],"royalties":[{"address":"address","percent":"5"}]}'
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"nickname","value":"Wonderland"},{"trait_type":"age","value":"30"},{"trait_type":"power","value":"50"},{"trait_type":"name","value":"Alice"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
         );
 
         bytes memory newTokenData = tokenData;
