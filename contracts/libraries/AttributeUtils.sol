@@ -13,6 +13,141 @@ library AttributeUtils {
 
     bytes private constant ATTRIBUTES_PATTERN = '"attributes":[';
     bytes private constant VALUE_PATTERN = '"value":"';
+    bytes private constant IMAGE_PATTERN = '"image":"';
+
+    /**
+     * @notice Sets or updates the image field in the token's metadata JSON.
+     * @dev If the `image` field exists, its value is updated.
+     *      If it does not exist, a new `image` field is added to the JSON.
+     *      This function uses string manipulation with byte arrays and assembly for efficiency.
+     *      It uses the BytesUtils library for helper functions.
+     * @param _strBytes The original token metadata as a byte array.
+     * @param _image The new image URL or value to set.
+     * @return A new byte array representing the updated token metadata.
+     */
+    function setTokenImage(bytes memory _strBytes, bytes memory _image) public pure returns (bytes memory) {
+        bytes memory imagePattern = IMAGE_PATTERN;
+        int256 index = _strBytes.indexOfFrom(imagePattern, 0);
+
+        if (index >= 0) {
+            // Image field exists, replace the value
+            uint256 imageIndex = uint256(index);
+
+            // Find the index of the start of the image value
+            uint256 valueStart = imageIndex + imagePattern.length;
+            uint256 valueEnd = valueStart;
+
+            // Find the end index of the current image value (denoted by the next double quote)
+            while (valueEnd < _strBytes.length && _strBytes[valueEnd] != '"') {
+                unchecked {
+                    valueEnd++;
+                }
+            }
+
+            // Escape special characters in the new image value
+            bytes memory escapedImage = _image.escapeString();
+
+            // Calculate the new length of the JSON string after replacing the image value
+            uint256 newLength = _strBytes.length - (valueEnd - valueStart) + escapedImage.length;
+            bytes memory newStrBytes = new bytes(newLength);
+
+            uint256 dest;
+            uint256 src;
+            uint256 len;
+
+            assembly {
+                dest := add(newStrBytes, 32)
+                src := add(_strBytes, 32)
+            }
+
+            // Copy the part before the image value
+            len = valueStart;
+            dest.memcpy(src, len);
+            dest += len;
+
+            // Copy the escaped new image value
+            assembly {
+                src := add(escapedImage, 32)
+                len := mload(escapedImage)
+            }
+            dest.memcpy(src, len);
+            dest += len;
+
+            // Copy the remaining part after the old image value
+            uint256 restLen = _strBytes.length - valueEnd;
+            assembly {
+                src := add(add(_strBytes, 32), valueEnd)
+            }
+            dest.memcpy(src, restLen);
+
+            return newStrBytes;
+        } else {
+            // Image field does not exist, add it
+            // Find the insertion point (after '{' or before the first field)
+            uint256 insertionPoint = 0;
+
+            // Check if JSON starts with '{'
+            if (_strBytes.length > 0 && _strBytes[0] == "{") {
+                insertionPoint = 1; // After '{'
+
+                // Move insertionPoint after any whitespace or newlines
+                while (insertionPoint < _strBytes.length && _strBytes[insertionPoint] <= 0x20) {
+                    unchecked {
+                        insertionPoint++;
+                    }
+                }
+            }
+
+            // Escape special characters in the new image value
+            bytes memory escapedImage = _image.escapeString();
+
+            // Construct the new image field
+            bytes memory newImageField = abi.encodePacked('"image":"', escapedImage, '"');
+
+            // Determine if we need to add a comma
+            bool needsComma = (_strBytes.length > insertionPoint && _strBytes[insertionPoint] != "}");
+
+            // Adjust the new image field accordingly
+            if (needsComma) {
+                newImageField = abi.encodePacked(newImageField, ",");
+            }
+
+            // Calculate the new length of the JSON string after adding the image field
+            uint256 newLength = _strBytes.length + newImageField.length;
+            bytes memory newStrBytes = new bytes(newLength);
+
+            uint256 dest;
+            uint256 src;
+            uint256 len;
+
+            assembly {
+                dest := add(newStrBytes, 32)
+                src := add(_strBytes, 32)
+            }
+
+            // Copy the part before the insertion point
+            len = insertionPoint;
+            dest.memcpy(src, len);
+            dest += len;
+
+            // Copy the new image field
+            assembly {
+                src := add(newImageField, 32)
+                len := mload(newImageField)
+            }
+            dest.memcpy(src, len);
+            dest += len;
+
+            // Copy the remaining part after the insertion point
+            uint256 restLen = _strBytes.length - insertionPoint;
+            assembly {
+                src := add(add(_strBytes, 32), insertionPoint)
+            }
+            dest.memcpy(src, restLen);
+
+            return newStrBytes;
+        }
+    }
 
     /**
      * @notice Sets or updates the value of a trait in the token's attributes JSON.
@@ -99,7 +234,8 @@ library AttributeUtils {
             bytes memory newTrait = abi.encodePacked(
                 '{"trait_type":"',
                 escapedTraitType,
-                '","value":"',
+                '",',
+                VALUE_PATTERN,
                 escapedValue,
                 endOfNewTrait
             );
