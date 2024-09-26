@@ -1,27 +1,45 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
+import "./BytesUtils.sol";
+
+/**
+ * @title AttributeUtils
+ * @dev Library for manipulating token attributes within a JSON metadata string.
+ *      Provides functions to set or remove traits in a token's attributes.
+ */
 library AttributeUtils {
+    using BytesUtils for *;
+
     bytes private constant ATTRIBUTES_PATTERN = '"attributes":[';
     bytes private constant VALUE_PATTERN = '"value":"';
 
+    /**
+     * @notice Sets or updates the value of a trait in the token's attributes JSON.
+     * @dev If the trait with the given `trait_type` exists, its `value` is updated.
+     *      If it does not exist, a new trait is added to the attributes array.
+     * @param _strBytes The original token metadata as a byte array.
+     * @param _trait_type The `trait_type` of the trait to set or update.
+     * @param _value The new `value` to assign to the trait.
+     * @return A new byte array representing the updated token metadata.
+     */
     function dangerSetTraitValue(
         bytes memory _strBytes,
         bytes memory _trait_type,
         bytes memory _value
     ) public pure returns (bytes memory) {
-        int256 indexOfAttributes = _indexOfFrom(_strBytes, ATTRIBUTES_PATTERN, 0);
+        int256 indexOfAttributes = _strBytes.indexOfFrom(ATTRIBUTES_PATTERN, 0);
         if (indexOfAttributes == -1) return _strBytes;
 
-        bytes memory traitTypePattern = abi.encodePacked(bytes('"trait_type":"'), _trait_type, bytes('"'));
-        int256 index = _indexOfFrom(_strBytes, traitTypePattern, uint256(indexOfAttributes));
+        bytes memory traitTypePattern = abi.encodePacked('"trait_type":"', _trait_type, '"');
+        int256 index = _strBytes.indexOfFrom(traitTypePattern, uint256(indexOfAttributes));
 
         if (index >= 0) {
             // Trait exists, replace the value
             uint256 traitIndex = uint256(index);
 
             // Find the index of '"value":"' after trait_type
-            int256 valueIndex = _indexOfFrom(_strBytes, VALUE_PATTERN, traitIndex);
+            int256 valueIndex = _strBytes.indexOfFrom(VALUE_PATTERN, traitIndex);
 
             if (valueIndex == -1) return _strBytes;
 
@@ -34,7 +52,7 @@ library AttributeUtils {
             }
 
             // Escape _value
-            bytes memory escapedValue = _escapeString(_value);
+            bytes memory escapedValue = _value.escapeString();
 
             // Calculate new length
             uint256 newLength = _strBytes.length - (valueEnd - valueStart) + escapedValue.length;
@@ -51,7 +69,7 @@ library AttributeUtils {
 
             // Copy the first part
             len = valueStart;
-            _memcpy(dest, src, len);
+            dest.memcpy(src, len);
             dest += len;
 
             // Copy the escapedValue
@@ -59,7 +77,7 @@ library AttributeUtils {
                 src := add(escapedValue, 32)
                 len := mload(escapedValue)
             }
-            _memcpy(dest, src, len);
+            dest.memcpy(src, len);
             dest += len;
 
             // Copy the rest
@@ -67,15 +85,15 @@ library AttributeUtils {
             assembly {
                 src := add(add(_strBytes, 32), valueEnd)
             }
-            _memcpy(dest, src, restLen);
+            dest.memcpy(src, restLen);
 
             return newStrBytes;
         } else {
             uint256 startAttributesIndex = uint256(indexOfAttributes) + ATTRIBUTES_PATTERN.length;
             string memory endOfNewTrait = _strBytes[startAttributesIndex] == "]" ? '"}' : '"},';
 
-            bytes memory escapedTraitType = _escapeString(_trait_type);
-            bytes memory escapedValue = _escapeString(_value);
+            bytes memory escapedTraitType = _trait_type.escapeString();
+            bytes memory escapedValue = _value.escapeString();
 
             // Trait does not exist, add new trait
             bytes memory newTrait = abi.encodePacked(
@@ -101,7 +119,7 @@ library AttributeUtils {
 
             // Copy the first part
             len = startAttributesIndex;
-            _memcpy(dest, src, len);
+            dest.memcpy(src, len);
             dest += len;
 
             // Copy newTrait
@@ -109,7 +127,7 @@ library AttributeUtils {
                 src := add(newTrait, 32)
                 len := mload(newTrait)
             }
-            _memcpy(dest, src, len);
+            dest.memcpy(src, len);
             dest += len;
 
             // Copy the rest
@@ -117,15 +135,23 @@ library AttributeUtils {
             assembly {
                 src := add(add(_strBytes, 32), startAttributesIndex)
             }
-            _memcpy(dest, src, restLen);
+            dest.memcpy(src, restLen);
 
             return newStrBytes;
         }
     }
 
+    /**
+     * @notice Removes a trait from the token's attributes JSON based on the `trait_type`.
+     * @dev Searches for the trait with the given `trait_type` and removes it from the attributes array.
+     *      If the trait is not found, the original JSON is returned unchanged.
+     * @param _strBytes The original token metadata as a byte array.
+     * @param _trait_type The `trait_type` of the trait to remove.
+     * @return A new byte array representing the updated token metadata without the specified trait.
+     */
     function dangerRemoveTrait(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
-        bytes memory traitTypePattern = abi.encodePacked(bytes('"trait_type":"'), _trait_type, bytes('"'));
-        int256 index = _indexOfFrom(_strBytes, traitTypePattern, 0);
+        bytes memory traitTypePattern = abi.encodePacked('"trait_type":"', _trait_type, '"');
+        int256 index = _strBytes.indexOfFrom(traitTypePattern, 0);
 
         if (index >= 0) {
             uint256 objectStart = uint256(index);
@@ -193,7 +219,7 @@ library AttributeUtils {
                         srcPtr := add(_strBytes, 32)
                     }
                     uint256 len = removeStart;
-                    _memcpy(destPtr, srcPtr, len);
+                    destPtr.memcpy(srcPtr, len);
                 }
 
                 // Copy after removeEnd
@@ -205,7 +231,7 @@ library AttributeUtils {
                         srcPtr := add(add(_strBytes, 32), removeEnd)
                     }
                     uint256 len = strBytesLength - removeEnd;
-                    _memcpy(destPtr, srcPtr, len);
+                    destPtr.memcpy(srcPtr, len);
                 }
             }
 
@@ -213,80 +239,6 @@ library AttributeUtils {
         } else {
             // Trait does not exist
             return _strBytes;
-        }
-    }
-
-    function _indexOfFrom(
-        bytes memory haystack,
-        bytes memory needle,
-        uint256 start
-    ) private pure returns (int256 index) {
-        assembly {
-            let hlen := mload(haystack)
-            let nlen := mload(needle)
-            let ptr := add(add(haystack, 32), start)
-            let nptr := add(needle, 32)
-
-            index := not(0) // Initialize to -1
-
-            if iszero(gt(add(nlen, start), hlen)) {
-                let end := add(add(haystack, 32), sub(hlen, nlen))
-                end := add(end, 1) // Adjust end to be inclusive
-
-                for {
-
-                } lt(ptr, end) {
-                    ptr := add(ptr, 1)
-                } {
-                    if eq(keccak256(ptr, nlen), keccak256(nptr, nlen)) {
-                        index := sub(ptr, add(haystack, 32))
-                        // Break out of the loop
-                        ptr := end
-                    }
-                }
-            }
-        }
-    }
-
-    function _escapeString(bytes memory input) private pure returns (bytes memory) {
-        unchecked {
-            uint256 length = input.length;
-            uint256 extraBytes = 0;
-            for (uint256 i = 0; i < length; i++) {
-                if (input[i] == '"' || input[i] == "\\") {
-                    extraBytes++;
-                }
-            }
-            bytes memory output = new bytes(length + extraBytes);
-            uint256 j = 0;
-            for (uint256 i = 0; i < length; i++) {
-                if (input[i] == '"' || input[i] == "\\") {
-                    output[j++] = "\\";
-                }
-                output[j++] = input[i];
-            }
-
-            return output;
-        }
-    }
-
-    function _memcpy(uint dest, uint src, uint len) private pure {
-        // Copy word-length chunks while possible
-        for (; len >= 32; len -= 32) {
-            assembly {
-                mstore(dest, mload(src))
-            }
-            dest += 32;
-            src += 32;
-        }
-        // Copy remaining bytes
-        if (len > 0) {
-            uint mask = 256 ** (32 - len) - 1;
-            assembly {
-                let srcpart := and(mload(src), not(mask))
-                let destpart := and(mload(dest), mask)
-                mstore(dest, or(destpart, srcpart))
-            }
         }
     }
 }

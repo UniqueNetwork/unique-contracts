@@ -2,7 +2,6 @@
 pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
-import "forge-std/console2.sol";
 import "../../contracts/test/Test__AttributesManager.sol";
 
 contract SetTokenDataTest is Test {
@@ -65,6 +64,28 @@ contract SetTokenDataTest is Test {
         assertEq(newAttributes, EXPECTED_ATTR_SET_NONEXISTENT_NO_ATTRIBUTES);
     }
 
+    function test_SetTraitWithSimilarTraitType1() public view {
+        // Existing trait_type is "age", we attempt to set "agee"
+        bytes memory EXPECTED_ATTR_SET_SIMILAR = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"agee","value":"33"},{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+
+        bytes memory newTokenData = attributesManager.setTrait(tokenData, "agee", "33");
+
+        assertEq(newTokenData, EXPECTED_ATTR_SET_SIMILAR);
+    }
+
+    function test_SetTraitWithSimilarTraitType2() public view {
+        // Existing trait_type is "age", we attempt to set "ag"
+        bytes memory EXPECTED_ATTR_SET_SIMILAR = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"ag","value":"33"},{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+
+        bytes memory newTokenData = attributesManager.setTrait(tokenData, "ag", "33");
+
+        assertEq(newTokenData, EXPECTED_ATTR_SET_SIMILAR);
+    }
+
     function test_SetTraitWithEmptyValue() public view {
         bytes memory EXPECTED_ATTR_SET_EMPTY_VALUE = bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":""},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
@@ -74,14 +95,58 @@ contract SetTokenDataTest is Test {
         assertEq(newAttributes, EXPECTED_ATTR_SET_EMPTY_VALUE);
     }
 
-    function test_SetTraitWithSpecialCharacters() public view {
+    function test_SetTraitWithSpecialCharactersInValue() public view {
         bytes memory EXPECTED_ATTR_SET_SPECIAL = bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"He said \\"Hello\\""},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
         );
         bytes memory newAttributes = attributesManager.setTrait(tokenData, "age", bytes('He said "Hello"'));
-        console2.logString(string(newAttributes));
 
         assertEq(newAttributes, EXPECTED_ATTR_SET_SPECIAL);
+    }
+
+    function test_SetTraitWithSpecialCharactersInTraitType() public view {
+        bytes memory EXPECTED_ATTR_SET_SPECIAL_TRAIT_TYPE = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"He said \\"Hello\\"","value":"42"},{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, bytes('He said "Hello"'), "42");
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_SPECIAL_TRAIT_TYPE);
+    }
+
+    function test_SetTraitWithBackslashInTraitType() public view {
+        bytes memory EXPECTED_ATTR_SET_BACKSLASH = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"C:\\\\Users\\\\User","value":"age"},{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, "C:\\Users\\User", bytes("age"));
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_BACKSLASH);
+    }
+
+    function test_SetTraitWithBackslashInValue() public view {
+        bytes memory EXPECTED_ATTR_SET_BACKSLASH = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"C:\\\\Users\\\\User"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, "age", bytes("C:\\Users\\User"));
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_BACKSLASH);
+    }
+
+    function test_SetTraitWithNewlineInValue() public view {
+        bytes memory EXPECTED_ATTR_SET_NEWLINE = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"Line1\\nLine2"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, "age", bytes("Line1\nLine2"));
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_NEWLINE);
+    }
+
+    function test_SetTraitWithTabInValue() public view {
+        bytes memory EXPECTED_ATTR_SET_TAB = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"Value\\tWith\\tTabs"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, "age", bytes("Value\tWith\tTabs"));
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_TAB);
     }
 
     function test_SetTraitWhenAttributesFieldIsMissing() public view {
@@ -108,6 +173,15 @@ contract SetTokenDataTest is Test {
         assertEq(newTokenData, expectedTokenData);
     }
 
+    function test_SetTraitWithEmptyTraitType() public view {
+        bytes memory EXPECTED_ATTR_SET_EMPTY_TRAIT_TYPE = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"","value":"SomeValue"},{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, "", "SomeValue");
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_EMPTY_TRAIT_TYPE);
+    }
+
     function test_SetMultipleTraits() public view {
         bytes memory EXPECTED_ATTR_SET_MULTIPLE = bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"nickname","value":"Wonderland"},{"trait_type":"age","value":"30"},{"trait_type":"power","value":"50"},{"trait_type":"name","value":"Alice"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
@@ -121,5 +195,49 @@ contract SetTokenDataTest is Test {
         newTokenData = attributesManager.setTrait(newTokenData, "nickname", "Wonderland");
 
         assertEq(newTokenData, EXPECTED_ATTR_SET_MULTIPLE);
+    }
+
+    function test_SetTraitWithUnicodeCharacters() public view {
+        // Unicode characters in trait_type and value
+        bytes memory unicodeTraitType = bytes(unicode"名字");
+        bytes memory unicodeValue = bytes(unicode"测试");
+
+        bytes memory EXPECTED_ATTR_SET_UNICODE = bytes(
+            unicode'{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"名字","value":"测试"},{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+
+        bytes memory newAttributes = attributesManager.setTrait(tokenData, unicodeTraitType, unicodeValue);
+
+        assertEq(newAttributes, EXPECTED_ATTR_SET_UNICODE);
+    }
+
+    function test_SetTraitWhenMultipleSameTraitTypesExist() public view {
+        // Token data with duplicate trait_types
+        bytes memory tokenDataWithDuplicates = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"age","value":"15"}]}'
+        );
+
+        // We attempt to set "age" to "33"; the function should replace the first occurrence
+        bytes memory EXPECTED_ATTR_SET_DUPLICATE = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"age","value":"33"},{"trait_type":"power","value":"10"},{"trait_type":"age","value":"15"}]}'
+        );
+
+        bytes memory newTokenData = attributesManager.setTrait(tokenDataWithDuplicates, "age", "33");
+
+        assertEq(newTokenData, EXPECTED_ATTR_SET_DUPLICATE);
+    }
+
+    function test_SetTraitWhenAttributesIsNotArray() public view {
+        // Token data where attributes is a string, not an array
+        bytes memory tokenDataWithInvalidAttributes = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","attributes":{"trait_type":"age","value":"18"}}'
+        );
+
+        // Since attributes is not an array, we expect the original token data to remain unchanged
+        bytes memory expectedTokenData = tokenDataWithInvalidAttributes;
+
+        bytes memory newTokenData = attributesManager.setTrait(tokenDataWithInvalidAttributes, "age", "33");
+
+        assertEq(newTokenData, expectedTokenData);
     }
 }
