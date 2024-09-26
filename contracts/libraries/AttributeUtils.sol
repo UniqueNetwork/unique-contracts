@@ -10,7 +10,7 @@ library AttributeUtils {
         bytes memory _trait_type,
         bytes memory _value
     ) public pure returns (bytes memory) {
-        int256 indexOfAttributes = _indexOf(_strBytes, ATTRIBUTES_PATTERN);
+        int256 indexOfAttributes = _indexOfFrom(_strBytes, ATTRIBUTES_PATTERN, 0);
         if (indexOfAttributes == -1) return _strBytes;
 
         bytes memory traitTypePattern = abi.encodePacked(bytes('"trait_type":"'), _trait_type, bytes('"'));
@@ -36,27 +36,38 @@ library AttributeUtils {
             // Escape _value
             bytes memory escapedValue = _escapeString(_value);
 
-            // Construct new bytes
-            bytes memory newStrBytes = new bytes(_strBytes.length - (valueEnd - valueStart) + escapedValue.length);
+            // Calculate new length
+            uint256 newLength = _strBytes.length - (valueEnd - valueStart) + escapedValue.length;
+            bytes memory newStrBytes = new bytes(newLength);
 
-            uint256 k = 0;
+            uint256 dest;
+            uint256 src;
+            uint256 len;
 
-            // Copy up to valueStart
-            unchecked {
-                for (uint256 i = 0; i < valueStart; i++) {
-                    newStrBytes[k++] = _strBytes[i];
-                }
-
-                // Insert new value
-                for (uint256 i = 0; i < escapedValue.length; i++) {
-                    newStrBytes[k++] = escapedValue[i];
-                }
-
-                // Copy the rest
-                for (uint256 i = valueEnd; i < _strBytes.length; i++) {
-                    newStrBytes[k++] = _strBytes[i];
-                }
+            assembly {
+                dest := add(newStrBytes, 32)
+                src := add(_strBytes, 32)
             }
+
+            // Copy the first part
+            len = valueStart;
+            _memcpy(dest, src, len);
+            dest += len;
+
+            // Copy the escapedValue
+            assembly {
+                src := add(escapedValue, 32)
+                len := mload(escapedValue)
+            }
+            _memcpy(dest, src, len);
+            dest += len;
+
+            // Copy the rest
+            uint256 restLen = _strBytes.length - valueEnd;
+            assembly {
+                src := add(add(_strBytes, 32), valueEnd)
+            }
+            _memcpy(dest, src, restLen);
 
             return newStrBytes;
         } else {
@@ -75,23 +86,38 @@ library AttributeUtils {
                 endOfNewTrait
             );
 
-            bytes memory newStrBytes = new bytes(_strBytes.length + newTrait.length);
+            // Calculate new length
+            uint256 newLength = _strBytes.length + newTrait.length;
+            bytes memory newStrBytes = new bytes(newLength);
 
-            uint256 k = 0;
+            uint256 dest;
+            uint256 src;
+            uint256 len;
 
-            unchecked {
-                for (uint256 i = 0; i < startAttributesIndex; i++) {
-                    newStrBytes[k++] = _strBytes[i];
-                }
-
-                for (uint256 i = 0; i < newTrait.length; i++) {
-                    newStrBytes[k++] = newTrait[i];
-                }
-
-                for (uint256 i = startAttributesIndex; i < _strBytes.length; i++) {
-                    newStrBytes[k++] = _strBytes[i];
-                }
+            assembly {
+                dest := add(newStrBytes, 32)
+                src := add(_strBytes, 32)
             }
+
+            // Copy the first part
+            len = startAttributesIndex;
+            _memcpy(dest, src, len);
+            dest += len;
+
+            // Copy newTrait
+            assembly {
+                src := add(newTrait, 32)
+                len := mload(newTrait)
+            }
+            _memcpy(dest, src, len);
+            dest += len;
+
+            // Copy the rest
+            uint256 restLen = _strBytes.length - startAttributesIndex;
+            assembly {
+                src := add(add(_strBytes, 32), startAttributesIndex)
+            }
+            _memcpy(dest, src, restLen);
 
             return newStrBytes;
         }
@@ -99,7 +125,7 @@ library AttributeUtils {
 
     function dangerRemoveTrait(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
         bytes memory traitTypePattern = abi.encodePacked(bytes('"trait_type":"'), _trait_type, bytes('"'));
-        int256 index = _indexOf(_strBytes, traitTypePattern);
+        int256 index = _indexOfFrom(_strBytes, traitTypePattern, 0);
 
         if (index >= 0) {
             uint256 objectStart = uint256(index);
@@ -155,20 +181,31 @@ library AttributeUtils {
                 newStrBytes = "[]";
             } else {
                 // Construct new bytes
-                newStrBytes = new bytes(strBytesLength - (removeEnd - removeStart));
+                uint256 newLength = strBytesLength - (removeEnd - removeStart);
+                newStrBytes = new bytes(newLength);
 
-                uint256 k = 0;
-
-                unchecked {
-                    // Copy up to removeStart
-                    for (uint256 i = 0; i < removeStart; i++) {
-                        newStrBytes[k++] = _strBytes[i];
+                // Copy up to removeStart
+                {
+                    uint256 destPtr;
+                    uint256 srcPtr;
+                    assembly {
+                        destPtr := add(newStrBytes, 32)
+                        srcPtr := add(_strBytes, 32)
                     }
+                    uint256 len = removeStart;
+                    _memcpy(destPtr, srcPtr, len);
+                }
 
-                    // Copy after removeEnd
-                    for (uint256 i = removeEnd; i < strBytesLength; i++) {
-                        newStrBytes[k++] = _strBytes[i];
+                // Copy after removeEnd
+                {
+                    uint256 destPtr;
+                    uint256 srcPtr;
+                    assembly {
+                        destPtr := add(add(newStrBytes, 32), removeStart)
+                        srcPtr := add(add(_strBytes, 32), removeEnd)
                     }
+                    uint256 len = strBytesLength - removeEnd;
+                    _memcpy(destPtr, srcPtr, len);
                 }
             }
 
@@ -179,61 +216,36 @@ library AttributeUtils {
         }
     }
 
-    function _indexOf(bytes memory haystack, bytes memory needle) private pure returns (int256) {
-        uint256 needleLength = needle.length;
-        uint256 haystackLength = haystack.length;
+    function _indexOfFrom(
+        bytes memory haystack,
+        bytes memory needle,
+        uint256 start
+    ) private pure returns (int256 index) {
+        assembly {
+            let hlen := mload(haystack)
+            let nlen := mload(needle)
+            let ptr := add(add(haystack, 32), start)
+            let nptr := add(needle, 32)
 
-        if (needleLength > haystackLength) {
-            return -1;
-        }
+            index := not(0) // Initialize to -1
 
-        uint256 searchLimit = haystackLength - needleLength;
+            if iszero(gt(add(nlen, start), hlen)) {
+                let end := add(add(haystack, 32), sub(hlen, nlen))
+                end := add(end, 1) // Adjust end to be inclusive
 
-        unchecked {
-            for (uint256 i = 0; i <= searchLimit; i++) {
-                bool matchFound = true;
-                for (uint256 j = 0; j < needleLength; j++) {
-                    if (haystack[i + j] != needle[j]) {
-                        matchFound = false;
-                        break;
+                for {
+
+                } lt(ptr, end) {
+                    ptr := add(ptr, 1)
+                } {
+                    if eq(keccak256(ptr, nlen), keccak256(nptr, nlen)) {
+                        index := sub(ptr, add(haystack, 32))
+                        // Break out of the loop
+                        ptr := end
                     }
                 }
-                if (matchFound) {
-                    return int256(i);
-                }
             }
         }
-
-        return -1;
-    }
-
-    function _indexOfFrom(bytes memory haystack, bytes memory needle, uint256 start) private pure returns (int256) {
-        uint256 needleLength = needle.length;
-        uint256 haystackLength = haystack.length;
-
-        unchecked {
-            if (needleLength + start > haystackLength) {
-                return -1;
-            }
-        }
-
-        uint256 searchLimit = haystackLength - needleLength;
-
-        unchecked {
-            for (uint256 i = start; i <= searchLimit; i++) {
-                bool matchFound = true;
-                for (uint256 j = 0; j < needleLength; j++) {
-                    if (haystack[i + j] != needle[j]) {
-                        matchFound = false;
-                        break;
-                    }
-                }
-                if (matchFound) {
-                    return int256(i);
-                }
-            }
-        }
-        return -1;
     }
 
     function _escapeString(bytes memory input) private pure returns (bytes memory) {
@@ -255,6 +267,26 @@ library AttributeUtils {
             }
 
             return output;
+        }
+    }
+
+    function _memcpy(uint dest, uint src, uint len) private pure {
+        // Copy word-length chunks while possible
+        for (; len >= 32; len -= 32) {
+            assembly {
+                mstore(dest, mload(src))
+            }
+            dest += 32;
+            src += 32;
+        }
+        // Copy remaining bytes
+        if (len > 0) {
+            uint mask = 256 ** (32 - len) - 1;
+            assembly {
+                let srcpart := and(mload(src), not(mask))
+                let destpart := and(mload(dest), mask)
+                mstore(dest, or(destpart, srcpart))
+            }
         }
     }
 }

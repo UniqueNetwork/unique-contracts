@@ -3,11 +3,13 @@
   "license": "MIT",
   "version": "0.0.1",
   "scripts": {
-    "test": "npx hardhat test --config ./hardhat.test.config.ts",
+    "test": "yarn compile && npx hardhat test --config ./hardhat.test.config.ts",
     "test:forge": "forge test --gas-report",
     "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network testnet",
     "run:hh": "npx hardhat run --no-compile",
-    "compile": "npx hardhat compile --force",
+    "compile": "yarn compile:hh & yarn compile:forge",
+    "compile:hh": "npx hardhat compile --force",
+    "compile:forge": "forge compile --force",
     "codestyle": "prettier . --write"
   },
   "dependencies": {
