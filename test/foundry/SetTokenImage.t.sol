@@ -2,14 +2,10 @@
 pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
-import "../../contracts/test/Test__AttributesManager.sol";
+import "../../contracts/libraries/AttributeUtils.sol";
 
 contract SetTokenDataTest is Test {
-    Test__AttributesManager attributesManager;
-
-    function setUp() public {
-        attributesManager = new Test__AttributesManager();
-    }
+    using AttributeUtils for *;
 
     function test_SetTokenImage_AddNew_SimpleURL() public pure {
         bytes memory metadata = bytes(
@@ -22,7 +18,7 @@ contract SetTokenDataTest is Test {
             '{"image":"https://example.com/image.png","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"age","value":"12"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -38,7 +34,7 @@ contract SetTokenDataTest is Test {
             '{"image":"https://example.com/image.png?size=large&format=webp","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"power","value":"10"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -54,7 +50,7 @@ contract SetTokenDataTest is Test {
             '{"image":"https://example.com/image name@123.png","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"name","value":"John"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -70,7 +66,7 @@ contract SetTokenDataTest is Test {
             '{"image":"https://example.com/image%20with%20spaces.png","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"rarity","value":"legendary"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -86,7 +82,7 @@ contract SetTokenDataTest is Test {
             unicode'{"image":"https://例子.测试/图片.png","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"category","value":"art"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -102,7 +98,7 @@ contract SetTokenDataTest is Test {
             '{"image":"https://example.com/image.png#section","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"level","value":"5"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -118,7 +114,7 @@ contract SetTokenDataTest is Test {
             '{"image":"https://example.com:8080/image.png","schemaName":"unique","schemaVersion":"2.0.0","attributes":[{"trait_type":"edition","value":"first"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -132,7 +128,7 @@ contract SetTokenDataTest is Test {
             '{"image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA","schemaName":"unique","schemaVersion":"2.0.0","attributes":[]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -150,7 +146,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com/new-image.png","attributes":[{"trait_type":"age","value":"12"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -166,7 +162,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com/new-image.png?size=large&format=webp","attributes":[{"trait_type":"power","value":"10"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -182,7 +178,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com/new image@456.png","attributes":[{"trait_type":"name","value":"John"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -198,7 +194,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com/new%20image.png","attributes":[{"trait_type":"rarity","value":"legendary"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -214,7 +210,7 @@ contract SetTokenDataTest is Test {
             unicode'{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://例子.测试/新图片.png","attributes":[{"trait_type":"category","value":"art"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -230,7 +226,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com/new-image.png#newsection","attributes":[{"trait_type":"level","value":"5"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -246,7 +242,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://example.com:9090/new-image.png","attributes":[{"trait_type":"edition","value":"first"}]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }
@@ -262,7 +258,7 @@ contract SetTokenDataTest is Test {
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"data:image/png;base64,newData","attributes":[]}'
         );
 
-        bytes memory updatedMetadata = AttributeUtils.setTokenImage(metadata, newImage);
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
 
         assertEq(updatedMetadata, expectedMetadata);
     }

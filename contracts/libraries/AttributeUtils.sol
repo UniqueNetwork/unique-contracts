@@ -158,7 +158,7 @@ library AttributeUtils {
      * @param _value The new `value` to assign to the trait.
      * @return A new byte array representing the updated token metadata.
      */
-    function dangerSetTraitValue(
+    function setTrait(
         bytes memory _strBytes,
         bytes memory _trait_type,
         bytes memory _value
@@ -285,7 +285,7 @@ library AttributeUtils {
      * @param _trait_type The `trait_type` of the trait to remove.
      * @return A new byte array representing the updated token metadata without the specified trait.
      */
-    function dangerRemoveTrait(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
+    function removeTrait(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
         bytes memory traitTypePattern = abi.encodePacked('"trait_type":"', _trait_type, '"');
         int256 index = _strBytes.indexOfFrom(traitTypePattern, 0);
 
@@ -375,6 +375,103 @@ library AttributeUtils {
         } else {
             // Trait does not exist
             return _strBytes;
+        }
+    }
+
+    /**
+     * @notice Retrieves the image field from the token's metadata JSON.
+     * @param _strBytes The original token metadata as a byte array.
+     * @return The image value as a byte array, or an empty byte array if not found.
+     */
+    function getImage(bytes memory _strBytes) public pure returns (bytes memory) {
+        bytes memory imagePattern = IMAGE_PATTERN;
+        int256 index = _strBytes.indexOfFrom(imagePattern, 0);
+
+        if (index >= 0) {
+            uint256 valueStart = uint256(index) + imagePattern.length;
+            uint256 valueEnd = valueStart;
+
+            // Find the end of the image value
+            while (valueEnd < _strBytes.length && _strBytes[valueEnd] != '"') {
+                unchecked {
+                    valueEnd++;
+                }
+            }
+
+            // Ensure the JSON is well-formed
+            if (valueEnd > _strBytes.length) {
+                return "";
+            }
+
+            uint256 length = valueEnd - valueStart;
+            bytes memory imageValue = new bytes(length);
+
+            uint256 dest;
+            uint256 src;
+
+            assembly {
+                dest := add(imageValue, 32)
+                src := add(_strBytes, add(32, valueStart))
+            }
+
+            BytesUtils.memcpy(dest, src, length);
+            return imageValue;
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * @notice Retrieves the value of a specific trait from the token's attributes JSON.
+     * @param _strBytes The original token metadata as a byte array.
+     * @param _trait_type The `trait_type` of the trait to retrieve.
+     * @return The value associated with the given `trait_type`, or an empty byte array if not found.
+     */
+    function getAttribute(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
+        // Ensure that the attributes array exists
+        int256 indexOfAttributes = _strBytes.indexOfFrom(ATTRIBUTES_PATTERN, 0);
+        if (indexOfAttributes == -1) return "";
+
+        // Build the trait_type pattern
+        bytes memory traitTypePattern = abi.encodePacked('"trait_type":"', _trait_type, '"');
+
+        // Find the trait_type within the attributes array
+        int256 index = _strBytes.indexOfFrom(traitTypePattern, uint256(indexOfAttributes));
+        if (index >= 0) {
+            // Find the index of '"value":"' after trait_type
+            int256 valueIndex = _strBytes.indexOfFrom(VALUE_PATTERN, uint256(index));
+            if (valueIndex == -1) return "";
+
+            uint256 valueStart = uint256(valueIndex) + VALUE_PATTERN.length;
+            uint256 valueEnd = valueStart;
+
+            // Find the end of the value string
+            while (valueEnd < _strBytes.length && _strBytes[valueEnd] != '"') {
+                unchecked {
+                    valueEnd++;
+                }
+            }
+
+            // Ensure the JSON is well-formed
+            if (valueEnd > _strBytes.length) {
+                return "";
+            }
+
+            uint256 length = valueEnd - valueStart;
+            bytes memory valueBytes = new bytes(length);
+
+            uint256 dest;
+            uint256 src;
+
+            assembly {
+                dest := add(valueBytes, 32)
+                src := add(_strBytes, add(32, valueStart))
+            }
+
+            BytesUtils.memcpy(dest, src, length);
+            return valueBytes;
+        } else {
+            return "";
         }
     }
 }
