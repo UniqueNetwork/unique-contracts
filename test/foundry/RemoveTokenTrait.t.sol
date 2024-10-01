@@ -2,10 +2,10 @@
 pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
-import "../../contracts/libraries/AttributeUtils.sol";
+import "../../contracts/libraries/utils/TokenDataUtils.sol";
 
 contract RemoveTraitTest is Test {
-    using AttributeUtils for *;
+    using TokenDataUtils for *;
 
     bytes constant attributes =
         bytes(
@@ -167,5 +167,19 @@ contract RemoveTraitTest is Test {
         bytes memory newAttributes = attributesWithEmptyTraitType.removeTrait("");
 
         assertEq(newAttributes, expectedAttributesAfterRemoval);
+    }
+
+    function test_RemoveTraitWithTraitTypeImage() public pure {
+        bytes memory attributesWithImageTrait = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"image","value":"http://localhost"},{"trait_type":"name","value":"John"}]}'
+        );
+
+        // we check that removed trait, not image outside the attributes
+        bytes memory newAttributes = attributesWithImageTrait.removeTrait("image");
+
+        assertEq(
+            newAttributes,
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"name","value":"John"}]}'
+        );
     }
 }

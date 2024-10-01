@@ -2,10 +2,10 @@
 pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
-import "../../contracts/libraries/AttributeUtils.sol";
+import "../../contracts/libraries/utils/TokenDataUtils.sol";
 
 contract SetTokenDataTest is Test {
-    using AttributeUtils for *;
+    using TokenDataUtils for *;
 
     function test_SetTokenImage_AddNew_SimpleURL() public pure {
         bytes memory metadata = bytes(
@@ -256,6 +256,22 @@ contract SetTokenDataTest is Test {
 
         bytes memory expectedMetadata = bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"data:image/png;base64,newData","attributes":[]}'
+        );
+
+        bytes memory updatedMetadata = metadata.setTokenImage(newImage);
+
+        assertEq(updatedMetadata, expectedMetadata);
+    }
+
+    function test_SetTokenImage_IfTraitImageExists() public pure {
+        bytes memory metadata = bytes(
+            '{"attributes":[{"trait_type":"image","value":"http://img.com/img.png"}]},"schemaName":"unique","schemaVersion":"2.0.0","image":"http://old.image.png","attributes":[]}'
+        );
+
+        bytes memory newImage = bytes("http://new.image.png");
+
+        bytes memory expectedMetadata = bytes(
+            '{"attributes":[{"trait_type":"image","value":"http://img.com/img.png"}]},"schemaName":"unique","schemaVersion":"2.0.0","image":"http://new.image.png","attributes":[]}'
         );
 
         bytes memory updatedMetadata = metadata.setTokenImage(newImage);

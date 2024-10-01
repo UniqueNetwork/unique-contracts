@@ -4,11 +4,11 @@ pragma solidity 0.8.24;
 import "./BytesUtils.sol";
 
 /**
- * @title AttributeUtils
+ * @title TokenDataUtils
  * @dev Library for manipulating token attributes within a JSON metadata string.
  *      Provides functions to set or remove traits in a token's attributes.
  */
-library AttributeUtils {
+library TokenDataUtils {
     using BytesUtils for *;
 
     bytes private constant ATTRIBUTES_PATTERN = '"attributes":[';
@@ -25,7 +25,7 @@ library AttributeUtils {
      * @param _image The new image URL or value to set.
      * @return A new byte array representing the updated token metadata.
      */
-    function setTokenImage(bytes memory _strBytes, bytes memory _image) public pure returns (bytes memory) {
+    function setTokenImage(bytes memory _strBytes, bytes memory _image) internal pure returns (bytes memory) {
         bytes memory imagePattern = IMAGE_PATTERN;
         int256 index = _strBytes.indexOfFrom(imagePattern, 0);
 
@@ -162,7 +162,7 @@ library AttributeUtils {
         bytes memory _strBytes,
         bytes memory _trait_type,
         bytes memory _value
-    ) public pure returns (bytes memory) {
+    ) internal pure returns (bytes memory) {
         int256 indexOfAttributes = _strBytes.indexOfFrom(ATTRIBUTES_PATTERN, 0);
         if (indexOfAttributes == -1) return _strBytes;
 
@@ -285,7 +285,7 @@ library AttributeUtils {
      * @param _trait_type The `trait_type` of the trait to remove.
      * @return A new byte array representing the updated token metadata without the specified trait.
      */
-    function removeTrait(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
+    function removeTrait(bytes memory _strBytes, bytes memory _trait_type) internal pure returns (bytes memory) {
         bytes memory traitTypePattern = abi.encodePacked('"trait_type":"', _trait_type, '"');
         int256 index = _strBytes.indexOfFrom(traitTypePattern, 0);
 
@@ -383,7 +383,7 @@ library AttributeUtils {
      * @param _strBytes The original token metadata as a byte array.
      * @return The image value as a byte array, or an empty byte array if not found.
      */
-    function getImage(bytes memory _strBytes) public pure returns (bytes memory) {
+    function getImage(bytes memory _strBytes) internal pure returns (bytes memory) {
         bytes memory imagePattern = IMAGE_PATTERN;
         int256 index = _strBytes.indexOfFrom(imagePattern, 0);
 
@@ -427,7 +427,7 @@ library AttributeUtils {
      * @param _trait_type The `trait_type` of the trait to retrieve.
      * @return The value associated with the given `trait_type`, or an empty byte array if not found.
      */
-    function getAttribute(bytes memory _strBytes, bytes memory _trait_type) public pure returns (bytes memory) {
+    function getTraitValue(bytes memory _strBytes, bytes memory _trait_type) internal pure returns (bytes memory) {
         // Ensure that the attributes array exists
         int256 indexOfAttributes = _strBytes.indexOfFrom(ATTRIBUTES_PATTERN, 0);
         if (indexOfAttributes == -1) return "";

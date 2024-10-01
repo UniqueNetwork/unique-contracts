@@ -2,10 +2,11 @@
 pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
-import "../../contracts/libraries/AttributeUtils.sol";
+import "../../contracts/libraries/utils/TokenDataUtils.sol";
 
 contract SetTokenDataTest is Test {
-    using AttributeUtils for *;
+    using TokenDataUtils for *;
+
     bytes constant tokenData =
         bytes(
             '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"name","value":"John"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
@@ -232,7 +233,22 @@ contract SetTokenDataTest is Test {
         // Since attributes is not an array, we expect the original token data to remain unchanged
         bytes memory expectedTokenData = tokenDataWithInvalidAttributes;
 
-        bytes memory newTokenData = tokenDataWithInvalidAttributes.setTrait("age", "33");
+        bytes memory newTokenData = tokenDataWithInvalidAttributes.setTrait("image", "33");
+        console2.logString(string(newTokenData));
+
+        assertEq(newTokenData, expectedTokenData);
+    }
+
+    function test_SetTraitWhithTraitTypeImage() public pure {
+        bytes memory tokenDataWithTraitImage = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"image","value":"22"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
+
+        bytes memory newTokenData = tokenDataWithTraitImage.setTrait("image", "33");
+
+        bytes memory expectedTokenData = bytes(
+            '{"schemaName":"unique","schemaVersion":"2.0.0","image":"https://stage-ipfs.unique.network/ipfs/QmaztXF7WjQAUSjpcDc46VBhgcTKa3d9eWiWszq3LVdf3p","attributes":[{"trait_type":"age","value":"12"},{"trait_type":"power","value":"10"},{"trait_type":"image","value":"33"}],"royalties":[{"address":"uneiqi1AaN5sP9Gqd476uJckgwwtuqTWbGU2pQ1JgsaDekziT","percent":"5"}]}'
+        );
 
         assertEq(newTokenData, expectedTokenData);
     }
