@@ -2,9 +2,10 @@
 pragma solidity 0.8.24;
 
 import {UniqueNFTMetadata} from "../libraries/UniqueNFTMetadata.sol";
-import {UniqueNFT} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
+import {Converter} from "../libraries/utils/Converter.sol";
 import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute, CrossAddress} from "../UniqueV2TokenMinter.sol";
+import {UniqueV2TokenMinter, Attribute} from "../UniqueV2TokenMinter.sol";
+import {AddressUtils, CrossAddress} from "../libraries/utils/AddressUtils.sol";
 
 struct TokenStats {
     uint32 breed;
@@ -16,12 +17,24 @@ struct TokenStats {
 
 contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     using UniqueNFTMetadata for address;
+    using AddressUtils for *;
+    using Converter for *;
 
     uint32 constant BREEDS = 2;
+    uint256 constant EVOLUTION_EXPERIENCE = 150;
     address private immutable COLLECTION_ADDRESS;
 
     mapping(uint256 generation => string ipfs) private s_generationIpfs;
     mapping(uint256 tokenId => TokenStats) private s_tokenStats;
+    uint256 private s_gladiator;
+
+    modifier onlyTokenOwner(uint256 _tokenId) {
+        require(
+            AddressUtils.messageSenderIsTokenOwner(COLLECTION_ADDRESS, _tokenId),
+            "BreedingSimulator: msg.sender is not the owner"
+        );
+        _;
+    }
 
     ///@dev This contract mints fighting collection in the constructor.
     ///     UniqueV2CollectionMinter(true, true, false) means token attributes will be:
@@ -33,6 +46,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         s_generationIpfs[
             1
         ] = "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmPqsyQRozG1vs2ZpgbPWQDbySqibaG6Q3sV7PGmSCxrBH/";
+
         COLLECTION_ADDRESS = _mintCollection(
             "Evolved",
             "Breeding simulator",
@@ -48,7 +62,12 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         uint32 randomTokenBreed = _getPseudoRandom(BREEDS, 1);
 
         // Construct token image url
-        string memory randomImage = string.concat(s_generationIpfs[0], "monster-", _uint2str(randomTokenBreed), ".png");
+        string memory randomImage = string.concat(
+            s_generationIpfs[0],
+            "monster-",
+            Converter.uint2str(randomTokenBreed),
+            ".png"
+        );
 
         Attribute[] memory attributes = new Attribute[](3);
 
@@ -66,24 +85,23 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         });
     }
 
-    // TODO make private
-    function fight(uint256 _tokenId1, uint256 _tokenId2) external {
-        uint256 winner = _getPseudoRandom(2, 0);
-        if (winner == 0) {
-            // tokenId1 wins
-            _increment(_tokenId1, "Experience", 50);
-            _increment(_tokenId1, "Victories", 1);
-            _increment(_tokenId2, "Defeats", 1);
-            _increment(_tokenId2, "Experience", 10);
-            _makeExhausted(_tokenId2);
-        } else {
-            // tokenId2 wins
-            _increment(_tokenId2, "Experience", 50);
-            _increment(_tokenId2, "Victories", 1);
-            _increment(_tokenId1, "Defeats", 1);
-            _increment(_tokenId1, "Experience", 10);
-            _makeExhausted(_tokenId1);
-        }
+    function evolve(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
+        TokenStats memory tokenStats = s_tokenStats[_tokenId];
+        require(tokenStats.experience >= EVOLUTION_EXPERIENCE, "Experience not enough");
+        require(tokenStats.generation == 0, "Already evolved");
+
+        s_tokenStats[_tokenId].generation += 1;
+        _setImage(_tokenId, false);
+    }
+
+    function enterArena(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
+        if (s_gladiator != 0 && s_gladiator != _tokenId) _fight(s_gladiator, _tokenId);
+        else s_gladiator = _tokenId;
+    }
+
+    function recover(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
+        // TODO: add some extra logic, for example check if a cooldown period has ended
+        _setImage(_tokenId, false);
     }
 
     /**
@@ -100,76 +118,59 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         string memory _symbol,
         string memory _collectionCover
     ) private returns (address) {
-        // TODO make private
         address collectionAddress = _createCollection(_name, _description, _symbol, _collectionCover);
 
-        UniqueNFT collection = UniqueNFT(collectionAddress);
-
-        // Set and confirm collection sponsorship by the contract address
-        collection.setCollectionSponsorCross(CrossAddress({eth: address(this), sub: 0}));
-        collection.confirmCollectionSponsorship();
-        // TODO: Sponsor every transaction
-
-        // Set this contract as an admin
-        // Because the minted collection will be owned by the user this contract
-        // has to be set as a collection admin in order to be able to mint NFTs
-        collection.addCollectionAdminCross(CrossAddress({eth: address(this), sub: 0}));
+        // You may also set sponsorship fpr the collection to create a fee-less experience:
+        // import {UniqueNFT} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
+        // UniqueNFT collection = UniqueNFT(collectionAddress);
+        // collection.setCollectionSponsorCross(CrossAddress({eth: address(this), sub: 0}));
+        // collection.confirmCollectionSponsorship();
 
         return collectionAddress;
     }
 
-    function _increment(uint256 _tokenId, string memory _trait, uint256 _value) private {
-        bytes memory traitValueBytes = COLLECTION_ADDRESS.getTraitValue(_tokenId, bytes(_trait));
-        uint256 currentValue = 0;
-        if (traitValueBytes.length > 0) {
-            string memory traitValueStr = string(traitValueBytes);
-            currentValue = _str2uint(traitValueStr);
-        }
-        uint256 newValue = currentValue + _value;
-        string memory newValueStr = _uint2str(newValue);
-        COLLECTION_ADDRESS.setTrait(_tokenId, bytes(_trait), bytes(newValueStr));
-    }
+    function _fight(uint256 _tokenId1, uint256 _tokenId2) private {
+        (uint256 winner, uint256 loser) = _getPseudoRandom(2, 0) == 0 ? (_tokenId1, _tokenId2) : (_tokenId2, _tokenId1);
 
-    function _str2uint(string memory _a) private pure returns (uint256) {
-        bytes memory bresult = bytes(_a);
-        uint256 result = 0;
-        for (uint256 i = 0; i < bresult.length; i++) {
-            uint8 digit = uint8(bresult[i]) - 48;
-            require(digit <= 9, "Invalid character in string");
-            result = result * 10 + digit;
-        }
-        return result;
-    }
+        // Update winner's stats
+        TokenStats memory winnerStats = s_tokenStats[winner];
+        winnerStats.victories += 1;
+        winnerStats.experience += 50;
+        s_tokenStats[winner] = winnerStats;
 
-    function _uint2str(uint256 _i) private pure returns (string memory) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 temp = _i;
-        uint256 digits;
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-        bytes memory buffer = new bytes(digits);
-        while (_i != 0) {
-            digits -= 1;
-            buffer[digits] = bytes1(uint8(48 + uint256(_i % 10)));
-            _i /= 10;
-        }
-        return string(buffer);
+        // Update loser's stats
+        TokenStats memory loserStats = s_tokenStats[loser];
+        loserStats.defeats += 1;
+        loserStats.experience += 10;
+        s_tokenStats[loser] = loserStats;
+
+        // Change winner's token attributes
+        COLLECTION_ADDRESS.setTrait(winner, "Experience", Converter.uint2bytes(winnerStats.experience));
+        COLLECTION_ADDRESS.setTrait(winner, "Victories", Converter.uint2bytes(winnerStats.victories));
+
+        // Change loser's token attributes
+        COLLECTION_ADDRESS.setTrait(loser, "Experience", Converter.uint2bytes(loserStats.experience));
+        COLLECTION_ADDRESS.setTrait(loser, "Defeats", Converter.uint2bytes(loserStats.defeats));
+        _makeExhausted(loser);
+        delete s_gladiator;
     }
 
     function _makeExhausted(uint256 _tokenId) private {
+        _setImage(_tokenId, true);
+        // TODO: we can set a cooldown period to recover the token
+    }
+
+    function _setImage(uint256 _tokenId, bool _exhausted) private {
         TokenStats memory tokenStats = s_tokenStats[_tokenId];
-        string memory exhaustedImage = string.concat(
+        string memory extension = _exhausted ? "b.png" : ".png";
+        string memory imageUrl = string.concat(
             s_generationIpfs[tokenStats.generation],
             "monster-",
-            _uint2str(tokenStats.breed),
-            "b.png"
+            Converter.uint2str(tokenStats.breed),
+            extension
         );
 
-        COLLECTION_ADDRESS.setImage(_tokenId, bytes(exhaustedImage));
+        COLLECTION_ADDRESS.setImage(_tokenId, bytes(imageUrl));
     }
 
     function _getPseudoRandom(uint256 _modulo, uint256 startFrom) private view returns (uint32) {
