@@ -3,7 +3,7 @@
   "license": "MIT",
   "version": "0.0.1",
   "scripts": {
-    "test": "yarn compile:hh && npx hardhat test --config ./hardhat.test.config.ts",
+    "test": "yarn compile && yarn test:hh && yarn test:forge",
     "test:forge": "forge test --gas-report",
     "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network testnet",
     "run:hh": "npx hardhat run --no-compile",
