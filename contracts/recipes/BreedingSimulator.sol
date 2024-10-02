@@ -7,36 +7,37 @@ import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
 import {UniqueV2TokenMinter, Attribute} from "../UniqueV2TokenMinter.sol";
 import {AddressUtils, CrossAddress} from "../libraries/utils/AddressUtils.sol";
 
-/// @notice token stats represents NFT's attributes and lifecycle
+/// @notice TokenStats represents an NFT's attributes and lifecycle.
 struct TokenStats {
-    uint32 breed; // The id of an NFTs type. Every breed has different image
-    uint32 generation; // Every NFT starts with generation 0 and can be evolved with experience growth
-    uint64 victories; // Number of victories
-    uint64 defeats; // Number of defeats
-    uint64 experience; // Experience earned
+    uint32 breed; // The id of an NFT's type. Every breed has a different image.
+    uint32 generation; // Every NFT starts with generation 0 and can evolve with experience growth.
+    uint64 victories; // Number of victories.
+    uint64 defeats; // Number of defeats.
+    uint64 experience; // Experience earned.
 }
 
 /// @title Breeding Simulator
 /// @dev A contract that simulates breeding, evolving, and battling of NFTs.
-///      This contract aims to demonstrate how to mutate tokens images and traits
+///      This contract aims to demonstrate how to mutate tokens' images and traits.
 ///      Users can `breed` new monsters and evolve them with experience growth.
 ///      You can see the example usage:
-///      - for ethereum accounts: TODO
-///      - for substrate accounts: TODO
+///      - For Ethereum accounts: use your Ethereum address in the CrossAddress structure when calling `breed`.
+///      - For Substrate accounts: use your Substrate address in the CrossAddress structure when calling `breed`.
 contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
-    /// @dev this library allows to set NFT's images and traits
+    /// @dev This library allows setting NFT's images and traits.
     using UniqueNFTMetadata for address;
-    /// @dev this library allows
+    /// @dev This library provides utility functions for CrossAddress and address operations.
     using AddressUtils for *;
+    /// @dev This library provides data type conversion utilities.
     using Converter for *;
 
-    /// @dev Total number of breeds available. For simplicity only 2 types of tokens (different images) available
+    /// @dev Total number of breeds available. For simplicity, only 2 types of tokens (different images) are available.
     uint32 constant BREEDS = 2;
 
     /// @dev Experience required to evolve to the next generation and change NFT's image.
     uint256 constant EVOLUTION_EXPERIENCE = 150;
 
-    /// @dev Address of the NFT collection. Created at the deploy time
+    /// @dev Address of the NFT collection. Created at the deploy time.
     address private immutable COLLECTION_ADDRESS;
 
     /// @dev Mapping from generation to IPFS base URL for images.
@@ -45,10 +46,10 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     /// @dev Mapping from token ID to its stats.
     mapping(uint256 tokenId => TokenStats) private s_tokenStats;
 
-    /// @dev tokenId awaiting for opponent
+    /// @dev Token ID awaiting for an opponent.
     uint256 private s_gladiator;
 
-    /// @dev checks if the msg.sender is the owner of the NFT
+    /// @dev Checks if the msg.sender is the owner of the NFT.
     modifier onlyTokenOwner(uint256 _tokenId) {
         require(
             AddressUtils.messageSenderIsTokenOwner(COLLECTION_ADDRESS, _tokenId),
@@ -57,11 +58,11 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         _;
     }
 
-    ///@dev This contract mints fighting collection in the constructor.
-    ///     UniqueV2CollectionMinter(true, true, false) means token attributes will be:
-    ///     mutable (true) by the collection admin (true), but not by the token owner (false)
+    /// @dev This contract mints a fighting collection in the constructor.
+    ///      UniqueV2CollectionMinter(true, true, false) means token attributes will be:
+    ///      mutable (true) by the collection admin (true), but not by the token owner (false).
     constructor() payable UniqueV2CollectionMinter(true, true, false) {
-        // monsters can be of generation 0 or 1. Each generation has its own IPFS base url
+        // Monsters can be of generation 0 or 1. Each generation has its own IPFS base URL.
         s_generationIpfs[
             0
         ] = "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmedQFp656axCAvKjo1iXqozH4Ew7AvDx8SFM4sH3hYHj6/";
@@ -69,8 +70,8 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             1
         ] = "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmPqsyQRozG1vs2ZpgbPWQDbySqibaG6Q3sV7PGmSCxrBH/";
 
-        // The contract mints collection and become the collection owner,
-        // so has permissions to mutate it's tokens attributes
+        // The contract mints a collection and becomes the collection owner,
+        // so it has permissions to mutate its tokens' attributes.
         COLLECTION_ADDRESS = _mintCollection(
             "Evolved",
             "Breeding simulator",
@@ -86,11 +87,11 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * @param _owner CrossAddress representing the owner of the new token.
      */
     function breed(CrossAddress memory _owner) external {
-        // For simplicity we have only 2 predefined images, type 1 or type 2
-        // Each player receives pseudo random token
+        // For simplicity, we have only 2 predefined images, type 1 or type 2.
+        // Each player receives a pseudo-random token breed.
         uint32 randomTokenBreed = _getPseudoRandom(BREEDS, 1);
 
-        // Construct token image url
+        // Construct token image URL.
         string memory randomImage = string.concat(
             s_generationIpfs[0],
             "monster-",
@@ -99,7 +100,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         );
 
         Attribute[] memory attributes = new Attribute[](3);
-        // Each NFT has 3 traits. These traits mutated when `_fight` method invoked
+        // Each NFT has 3 traits. These traits are mutated when the `_fight` method is invoked.
         attributes[0] = Attribute({trait_type: "Experience", value: "0"});
         attributes[1] = Attribute({trait_type: "Victories", value: "0"});
         attributes[2] = Attribute({trait_type: "Defeats", value: "0"});
@@ -116,7 +117,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
 
     /**
      * @notice Evolves the token to the next generation if it has enough experience.
-     *         Token's image changes
+     *         The token's image changes upon evolution.
      * @param _tokenId The ID of the token to evolve.
      */
     function evolve(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
@@ -130,7 +131,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
 
     /**
      * @notice Enters the token into the arena for battle.
-     *         As a result of a battle tokens traits and images will change
+     *         As a result of a battle, the token's traits and image will change.
      * @param _tokenId The ID of the token to enter the arena.
      */
     function enterArena(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
@@ -140,11 +141,11 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
 
     /**
      * @notice Recovers the token after being exhausted from battle.
-     *         Changes token's image to the normal state
+     *         Changes the token's image to the normal state.
+     *         Note: Currently, there is no cooldown period, but this can be extended to include one.
      * @param _tokenId The ID of the token to recover.
      */
     function recover(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
-        // TODO: add some extra logic, for example check if a cooldown period has ended
         _setImage(_tokenId, false);
     }
 
@@ -164,7 +165,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     ) private returns (address) {
         address collectionAddress = _createCollection(_name, _description, _symbol, _collectionCover);
 
-        // You may also set sponsorship fpr the collection to create a fee-less experience:
+        // You may also set sponsorship for the collection to create a fee-less experience:
         // import {UniqueNFT} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
         // UniqueNFT collection = UniqueNFT(collectionAddress);
         // collection.setCollectionSponsorCross(CrossAddress({eth: address(this), sub: 0}));
@@ -182,13 +183,13 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         // Randomly decide the winner and loser.
         (uint256 winner, uint256 loser) = _getPseudoRandom(2, 0) == 0 ? (_tokenId1, _tokenId2) : (_tokenId2, _tokenId1);
 
-        // Update winner's stats
+        // Update winner's stats.
         TokenStats memory winnerStats = s_tokenStats[winner];
         winnerStats.victories += 1;
         winnerStats.experience += 50;
         s_tokenStats[winner] = winnerStats;
 
-        // Update loser's stats
+        // Update loser's stats.
         TokenStats memory loserStats = s_tokenStats[loser];
         loserStats.defeats += 1;
         loserStats.experience += 10;
@@ -202,14 +203,15 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         COLLECTION_ADDRESS.setTrait(loser, "Experience", Converter.uint2bytes(loserStats.experience));
         COLLECTION_ADDRESS.setTrait(loser, "Defeats", Converter.uint2bytes(loserStats.defeats));
 
-        // Make the loser exhausted (change NFTs image).
+        // Make the loser exhausted (change NFT's image).
         _makeExhausted(loser);
 
         delete s_gladiator;
     }
 
     /**
-     * @dev Changes an NFT's image to exhausted version
+     * @dev Changes an NFT's image to exhausted version.
+     *      Note: Currently, there is no cooldown period before recovery.
      * @param _tokenId ID of the token to mark as exhausted.
      */
     function _makeExhausted(uint256 _tokenId) private {
@@ -242,7 +244,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * @return A pseudo-random uint32 number.
      */
     function _getPseudoRandom(uint256 _modulo, uint256 startFrom) private view returns (uint32) {
-        uint256 randomHash = uint(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender)));
+        uint256 randomHash = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender)));
 
         return uint32((randomHash % _modulo) + startFrom);
     }
