@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity >=0.8.18 <=0.8.24;
 
 import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionNestingAndPermission, Property, TokenPropertyPermission, PropertyPermission, TokenPermissionField} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import "./libraries/UniquePrecompiles.sol";

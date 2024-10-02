@@ -33,7 +33,7 @@
     "@types/chai-as-promised": "^7.1.6",
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=18.0.0",
-    "@unique-nft/solidity-interfaces": "^0.70.0",
+    "@unique-nft/solidity-interfaces": "^1.0.1",
     "chai": "^4.2.0",
     "ethers": "^6.13.2",
     "hardhat": "^2.22.7",

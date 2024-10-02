@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity >=0.8.18 <=0.8.24;
 
 import {UniqueNFT, Property, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 
