@@ -5,7 +5,10 @@ import "@nomicfoundation/hardhat-foundry";
 import testConfig from "./test/utils/config";
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.24",
+  solidity: {
+    version: "0.8.24",
+    settings: { viaIR: true },
+  },
   networks: {
     testnet: {
       url: testConfig.rpc,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import "@unique-nft/solidity-interfaces/contracts/UniqueFungible.sol";
+import {UniqueFungible} from "@unique-nft/solidity-interfaces/contracts/UniqueFungible.sol";
 import {UniquePrecompiles} from "../libraries/UniquePrecompiles.sol";
 import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
 

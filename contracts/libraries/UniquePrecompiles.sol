@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity >=0.8.18 <=0.8.24;
 
 import {CollectionHelpers} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import {ContractHelpers} from "@unique-nft/solidity-interfaces/contracts/ContractHelpers.sol";

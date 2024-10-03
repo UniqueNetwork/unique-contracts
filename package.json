@@ -3,11 +3,13 @@
   "license": "MIT",
   "version": "0.0.1",
   "scripts": {
-    "test": "npx hardhat test --config ./hardhat.test.config.ts",
+    "test": "yarn compile && yarn test:hh && yarn test:forge",
     "test:forge": "forge test --gas-report",
     "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network testnet",
     "run:hh": "npx hardhat run --no-compile",
-    "compile": "npx hardhat compile --force",
+    "compile": "yarn compile:hh & yarn compile:forge",
+    "compile:hh": "npx hardhat compile --force",
+    "compile:forge": "forge compile --force",
     "codestyle": "prettier . --write"
   },
   "dependencies": {
@@ -31,7 +33,7 @@
     "@types/chai-as-promised": "^7.1.6",
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=18.0.0",
-    "@unique-nft/solidity-interfaces": "^0.70.0",
+    "@unique-nft/solidity-interfaces": "^1.0.1",
     "chai": "^4.2.0",
     "ethers": "^6.13.2",
     "hardhat": "^2.22.7",
