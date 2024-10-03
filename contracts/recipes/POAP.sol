@@ -101,6 +101,7 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             CollectionNestingAndPermission({token_owner: false, collection_admin: false, restricted: new address[](0)}),
             collectionLimits,
             new Property[](0),
+            CrossAddress({eth: address(0), sub: 0}),
             new TokenPropertyPermission[](0)
         );
 
