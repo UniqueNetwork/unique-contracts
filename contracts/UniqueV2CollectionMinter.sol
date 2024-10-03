@@ -28,7 +28,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     }
 
     /**
-     * @dev Internal function to create a new collection with default settings.
+     * @dev Function to create a new collection with default settings.
      *
      * @param _name The name of the collection to be created.
      * @param _description A brief description of the collection.
@@ -61,7 +61,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     }
 
     /**
-     * @dev Internal function to create a new collection.
+     * @dev Function to create a new collection.
      * @param _name Name of the collection.
      * @param _description Description of the collection.
      * @param _symbol Symbol prefix for the tokens in the collection.
@@ -116,7 +116,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         bool _defaultMutable,
         bool _defaultCollectionAdmin,
         bool _defaultTokenOwner
-    ) internal pure returns (TokenPropertyPermission[] memory) {
+    ) private pure returns (TokenPropertyPermission[] memory) {
         uint256 tppLength = _customTPPs.length + 8;
         TokenPropertyPermission[] memory extendedTPPs = new TokenPropertyPermission[](tppLength);
 
@@ -153,7 +153,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     function _withUniqueV2CollectionProperties(
         Property[] memory customCollectionProperties,
         string memory coverImage
-    ) internal pure returns (Property[] memory) {
+    ) private pure returns (Property[] memory) {
         uint256 totalPropertiesLength = customCollectionProperties.length + 3;
         Property[] memory propertiesV2 = new Property[](totalPropertiesLength);
 

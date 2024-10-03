@@ -23,11 +23,9 @@ struct TokenStats {
 ///      You can see the example usage:
 ///      - For Ethereum accounts: use your Ethereum address in the CrossAddress structure when calling `breed`.
 ///      - For Substrate accounts: use your Substrate address in the CrossAddress structure when calling `breed`.
-contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     /// @dev This library allows setting NFT's images and traits.
     using UniqueNFTMetadata for address;
-    /// @dev This library provides utility functions for CrossAddress and address operations.
-    using AddressUtils for *;
     /// @dev This library provides data type conversion utilities.
     using Converter for *;
 
@@ -53,7 +51,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     modifier onlyTokenOwner(uint256 _tokenId) {
         require(
             AddressUtils.messageSenderIsTokenOwner(COLLECTION_ADDRESS, _tokenId),
-            "BreedingSimulator: msg.sender is not the owner"
+            "BreedingGame: msg.sender is not the owner"
         );
         _;
     }

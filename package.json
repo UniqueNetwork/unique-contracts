@@ -21,15 +21,16 @@
     "!/contracts/recipes"
   ],
   "scripts": {
-    "test": "yarn compile && yarn test:hh & yarn test:forge",
-    "test:forge": "forge test --gas-report",
+    "test": "yarn compile && yarn test:hh & yarn test:f",
+    "test:f": "forge test --gas-report",
     "test:hh": "npx hardhat test --no-compile --config ./hardhat.test.config.ts --network testnet",
     "run:hh": "npx hardhat run --no-compile",
-    "": "yarn compile:hh & yarn compile:forge",
+    "compile": "yarn compile:hh & yarn compile:f",
     "compile:hh": "npx hardhat compile --force",
-    "compile:forge": "forge compile --force",
+    "compile:f": "forge compile --force",
     "codestyle": "prettier . --write",
-    "prepublishOnly": "yarn test:hh",
+    "ci": "yarn compile:f && yarn test:f",
+    "prepublishOnly": "yarn ci",
     "changeset": "npx changeset",
     "local-release": "changeset version && changeset publish"
   },
