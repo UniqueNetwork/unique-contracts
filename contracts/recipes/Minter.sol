@@ -3,8 +3,8 @@ pragma solidity 0.8.24;
 
 import {UniqueNFT, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 import {Property, CollectionLimitValue, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {UniqueV2CollectionMinter, CollectionMode, TokenPropertyPermission} from "../UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute} from "../UniqueV2TokenMinter.sol";
+import {UniqueV2CollectionMinter, CollectionMode, TokenPropertyPermission} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
+import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/UniqueV2TokenMinter.sol";
 
 /**
  * @title Minter

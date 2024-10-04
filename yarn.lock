@@ -1201,6 +1201,13 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"
   integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
 
+"@unique-nft/contracts@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@unique-nft/contracts/-/contracts-0.0.1.tgz#ed7090eec09d0758f78754054b39e9261a29762b"
+  integrity sha512-VLJWoKeT6lsbSqr6I7N6t6/ORraqk3PZtvmy3NcxUHoBe/tsc1lLuj7lpDzPJ1oP7Y80kXNcQWIavcgQ3oPgOg==
+  dependencies:
+    "@unique-nft/solidity-interfaces" "^1.0.1"
+
 "@unique-nft/sdk@^0.7.7":
   version "0.7.7"
   resolved "https://registry.yarnpkg.com/@unique-nft/sdk/-/sdk-0.7.7.tgz#430a5ee5b3fe48d87e92c70a0d6223c75b1d0c9a"
