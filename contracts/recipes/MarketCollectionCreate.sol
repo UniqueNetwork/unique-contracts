@@ -12,19 +12,11 @@ import {CrossAddress} from "../UniqueV2TokenMinter.sol";
  */
 contract MarketCollectionCreate is UniqueV2CollectionMinter {
 
-    uint256 private collectionCreationFee;
-
     event CollectionCreated(uint256 collectionId, address collectionAddress);
 
     error IncorrectFee();
 
-    /**
-     * @dev Sets default property permissions and allows the contract to receive UNQ for transaction sponsorship.
-     * @param _collectionCreationFee The fee required to create a collection.
-     */
-    constructor(uint256 _collectionCreationFee) payable UniqueV2CollectionMinter(true, true, false) {
-        collectionCreationFee = _collectionCreationFee;
-    }
+    constructor() payable UniqueV2CollectionMinter(true, true, true) {}
 
     receive() external payable {}
 
@@ -51,7 +43,7 @@ contract MarketCollectionCreate is UniqueV2CollectionMinter {
         bool _nestingPermissionsTokenOwner,
         bool _nestingPermissionsCollectionAdmin
     ) external payable {
-        if (msg.value != collectionCreationFee) revert IncorrectFee();
+        if (msg.value != COLLECTION_HELPERS.collectionCreationFee()) revert IncorrectFee();
 
         // 1. Set collection limits
         CollectionLimitValue[] memory collectionLimits = new CollectionLimitValue[](3);
@@ -96,9 +88,8 @@ contract MarketCollectionCreate is UniqueV2CollectionMinter {
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
         COLLECTION_HELPERS.makeCollectionERC721MetadataCompatible(collectionAddress, _collectionCover);
-        collection.addCollectionAdminCross(CrossAddress(address(this), 0));
+        collection.addCollectionAdminCross(CrossAddress(msg.sender, 0));
         collection.changeCollectionOwnerCross(CrossAddress(msg.sender, 0));
-        //collection.setCollectionSponsorCross(CrossAddress({eth: address(msg.sender), sub: 0}));
 
         emit CollectionCreated(COLLECTION_HELPERS.collectionId(collectionAddress), collectionAddress);
     }

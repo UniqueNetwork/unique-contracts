@@ -65,7 +65,7 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             nesting_settings,
             new CollectionLimitValue[](0),
             new Property[](0),
-            CrossAddress({eth: address(0), sub: 0}),
+            CrossAddress({eth: msg.sender, sub: 0})
             new TokenPropertyPermission[](0)
         );
 

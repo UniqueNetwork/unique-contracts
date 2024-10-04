@@ -1,14 +1,13 @@
 import { it } from "mocha";
 import { ethers } from "hardhat";
 import { expect } from "chai";
+import testConfig from "./utils/config";
 
 it("should deploy and create collection in MarketCollectionCreate contract", async () => {
   const [collectionOwner] = await ethers.getSigners();
-  const COLECTION_CREATION_FEE = 2n * 10n ** 18n;
-
+  const contractHelpers = testConfig.collectionHelpers.connect(collectionOwner);
   const MarketCollectionFactory = await ethers.getContractFactory("MarketCollectionCreate");
   const marketCollectionCreate = await MarketCollectionFactory.connect(collectionOwner).deploy(
-    COLECTION_CREATION_FEE,
     { gasLimit: 3_500_000 },
   );
   await marketCollectionCreate.waitForDeployment();
@@ -17,8 +16,6 @@ it("should deploy and create collection in MarketCollectionCreate contract", asy
   console.log("MarketCollectionCreate contract address:", marketCollectionAddress);
 
   expect(marketCollectionAddress).to.be.properAddress;
-  const collectionOwnerBalanceAfterDeploy = await ethers.provider.getBalance(collectionOwner.address);
-  expect(collectionOwnerBalanceAfterDeploy).to.be.gt(100n * 10n ** 18n); // Ensure the owner has sufficient balance
 
   const mintCollectionTx = await marketCollectionCreate.connect(collectionOwner).createCollection(
     "Test Collection",
@@ -30,7 +27,7 @@ it("should deploy and create collection in MarketCollectionCreate contract", asy
     50,
     true,
     true,
-    { gasLimit: 2000_000, value: COLECTION_CREATION_FEE },
+    { gasLimit: 2000_000, value: await contractHelpers.collectionCreationFee() },
   );
 
   const receipt = await mintCollectionTx.wait();

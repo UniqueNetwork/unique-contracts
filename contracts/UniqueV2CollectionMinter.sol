@@ -3,7 +3,6 @@ pragma solidity >=0.8.18 <=0.8.24;
 
 import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionNestingAndPermission, Property, TokenPropertyPermission, PropertyPermission, TokenPermissionField} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import "./libraries/UniquePrecompiles.sol";
-import "./libraries/UniqueV2Metadata.sol";
 import {CrossAddress} from "./UniqueV2TokenMinter.sol";
 
 struct DefaultTokenPropertyPermission {
@@ -94,8 +93,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.token_prefix = _symbol;
         data.limits = _limits;
         data.nesting_settings = nesting_settings;
-        data.pending_sponsor.eth = _pending_sponsor.eth;
-        data.pending_sponsor.sub = _pending_sponsor.sub;
+        data.pending_sponsor = _pending_sponsor;
 
         DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokemPropertyPermissions;
 
