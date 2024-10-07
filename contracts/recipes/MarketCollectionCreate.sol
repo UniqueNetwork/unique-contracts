@@ -88,7 +88,6 @@ contract MarketCollectionCreate is UniqueV2CollectionMinter {
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
         COLLECTION_HELPERS.makeCollectionERC721MetadataCompatible(collectionAddress, _collectionCover);
-        collection.addCollectionAdminCross(CrossAddress(msg.sender, 0));
         collection.changeCollectionOwnerCross(CrossAddress(msg.sender, 0));
 
         emit CollectionCreated(COLLECTION_HELPERS.collectionId(collectionAddress), collectionAddress);
