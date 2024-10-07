@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import { ContractHelpers__factory } from "../../typechain-types";
+import { ContractHelpers__factory, CollectionHelpers__factory } from "../../typechain-types";
 dotenv.config();
 
 const getConfig = () => {
@@ -11,6 +11,10 @@ const getConfig = () => {
     "0x842899ecf380553e8a4de75bf534cdf6fbf64049",
   );
 
+  const collectionHelpers = CollectionHelpers__factory.connect(
+    "0x6C4E9fE1AE37a41E93CEE429e8E1881aBdcbb54F",
+  );
+
   const accounts = TEST_ACCOUNTS_ETH.split(",");
 
   return {
@@ -18,6 +22,7 @@ const getConfig = () => {
     rpc: TEST_NETWORK,
     rest: TEST_REST,
     contractHelpers,
+    collectionHelpers,
   };
 };
 

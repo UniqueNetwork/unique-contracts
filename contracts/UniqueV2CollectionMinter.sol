@@ -3,6 +3,7 @@ pragma solidity >=0.8.18 <=0.8.24;
 
 import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionNestingAndPermission, Property, TokenPropertyPermission, PropertyPermission, TokenPermissionField} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import "./libraries/UniquePrecompiles.sol";
+import {CrossAddress} from "./UniqueV2TokenMinter.sol";
 
 struct DefaultTokenPropertyPermission {
     bool isMutable;
@@ -41,7 +42,8 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         string memory _name,
         string memory _description,
         string memory _symbol,
-        string memory _collectionCover
+        string memory _collectionCover,
+        CrossAddress memory _pending_sponsor
     ) internal returns (address) {
         return
             _createCollection(
@@ -56,6 +58,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
                 }),
                 new CollectionLimitValue[](0),
                 new Property[](0),
+                _pending_sponsor,
                 new TokenPropertyPermission[](0)
             );
     }
@@ -67,6 +70,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
      * @param _symbol Symbol prefix for the tokens in the collection.
      * @param _collectionCover URL of the cover image for the collection.
      * @param _customCollectionProperties Array of custom properties for the collection.
+     * @param _pending_sponsor Collection sponsor address
      * @param _customTokenPropertyPermissions Array of custom token property permissions.
      * @return Address of the created collection.
      */
@@ -79,7 +83,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         CollectionLimitValue[] memory _limits,
         Property[] memory _customCollectionProperties,
         // CollectionMode mode,
-        // CrossAddress memory _pending_sponsor,
+        CrossAddress memory _pending_sponsor,
         TokenPropertyPermission[] memory _customTokenPropertyPermissions
     ) internal returns (address) {
         CreateCollectionData memory data;
@@ -89,6 +93,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.token_prefix = _symbol;
         data.limits = _limits;
         data.nesting_settings = nesting_settings;
+        data.pending_sponsor = _pending_sponsor;
 
         DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokemPropertyPermissions;
 
