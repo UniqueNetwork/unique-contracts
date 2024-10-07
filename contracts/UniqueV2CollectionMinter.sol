@@ -15,7 +15,7 @@ struct DefaultTokenPropertyPermission {
  * @dev Abstract contract for minting collections in the Unique V2 Schema.
  */
 abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
-    DefaultTokenPropertyPermission private s_defaultTokemPropertyPermissions;
+    DefaultTokenPropertyPermission private s_defaultTokenPropertyPermissions;
 
     /**
      * @dev Initializes the contract with default property permissions.
@@ -24,7 +24,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
      * @param _admin Boolean indicating if the collection admin has permissions by default.
      */
     constructor(bool _mutable, bool _admin, bool _tokenOwner) {
-        s_defaultTokemPropertyPermissions = DefaultTokenPropertyPermission(_mutable, _admin, _tokenOwner);
+        s_defaultTokenPropertyPermissions = DefaultTokenPropertyPermission(_mutable, _admin, _tokenOwner);
     }
 
     /**
@@ -90,7 +90,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.limits = _limits;
         data.nesting_settings = nesting_settings;
 
-        DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokemPropertyPermissions;
+        DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokenPropertyPermissions;
 
         data.token_property_permissions = _withUniqueV2TokenPropertyPermissions(
             _customTokenPropertyPermissions,

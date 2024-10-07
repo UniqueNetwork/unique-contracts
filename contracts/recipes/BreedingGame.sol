@@ -147,6 +147,15 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         _setImage(_tokenId, false);
     }
 
+    function getGladiator() external view returns (uint256) {
+        return s_gladiator;
+    }
+
+    function canEvolve(uint256 _tokenId) external view returns (bool) {
+        TokenStats memory tokenStats = s_tokenStats[_tokenId];
+        return tokenStats.experience >= EVOLUTION_EXPERIENCE && tokenStats.generation == 0;
+    }
+
     /**
      * @dev Function to mint a new collection.
      * @param _name Name of the collection.
