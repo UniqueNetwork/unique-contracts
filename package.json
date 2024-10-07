@@ -1,7 +1,7 @@
 {
   "name": "@unique-nft/contracts",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Smart Contract library for Unique Network",
   "keywords": [
     "unique network",
@@ -31,6 +31,7 @@
     "codestyle": "prettier . --write",
     "ci": "yarn compile:f && yarn test:f",
     "prepublishOnly": "yarn ci",
+    "build:dist": "mkdir -p dist && cp package.json README.md dist/ && rsync -a --exclude='recipes' contracts/ dist/",
     "changeset": "npx changeset",
     "local-release": "changeset version && changeset publish"
   },
@@ -53,7 +54,7 @@
     "@types/chai-as-promised": "^7.1.6",
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=18.0.0",
-    "@unique-nft/contracts": "^0.0.1",
+    "@unique-nft/contracts": "^0.0.2",
     "@unique-nft/sdk": "^0.7.7",
     "@unique-nft/utils": "^0.3.20",
     "chai": "^4.2.0",
