@@ -13,7 +13,7 @@ This repository contains smart contracts for minting collections and tokens usin
     - [Contracts](#contracts)
       - [`CollectionMinter.sol`](#collectionmintersol)
       - [`TokenMinter.sol`](#tokenmintersol)
-      - [TokenManager.sol](#tokenmanagersol)
+      - [`TokenManager.sol`](#tokenmanagersol)
       - [`AddressValidator.sol`](#addressvalidatorsol)
   - [Example Usage](#example-usage)
   - [Run tests](#run-tests)
@@ -52,7 +52,7 @@ The `AddressUtils` library provides helper methods to work with the `CrossAddres
 
 #### [`CollectionMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/CollectionMinter.sol)
 
-`import "@unique-nft/contracts/CollectionMinter";`
+`import "@unique-nft/contracts/CollectionMinter.sol";`
 
 Provides functions to create collections in the Unique Schema V2.
 
@@ -72,7 +72,7 @@ Creates a collection with specified name, description, symbol, collection cover,
 
 #### [`TokenMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/TokenMinter.sol)
 
-`import "@unique-nft/contracts/TokenMinter";`
+`import "@unique-nft/contracts/TokenMinter.sol";`
 
 Provides functions to create tokens in the Unique Schema V2.
 
@@ -84,7 +84,7 @@ Internal function to create a new token with specified image and attributes in a
 
 ---
 
-#### [TokenManager.sol](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/TokenManager.sol)
+#### [`TokenManager.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/TokenManager.sol)
 
 `import "@unique-nft/contracts/TokenManager.sol";`
 
@@ -118,7 +118,7 @@ Retrieves the value of a specific trait for a token in a collection.
 
 #### [`AddressValidator.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/AddressValidator.sol)
 
-`import "@unique-nft/contracts/AddressValidator";`
+`import "@unique-nft/contracts/AddressValidator.sol";`
 
 Provides modifiers for validating addresses in token-related operations, ensuring that the caller is authorized.
 
