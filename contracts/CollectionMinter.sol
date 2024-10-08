@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.18 <=0.8.24;
 
-import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionNestingAndPermission, Property, TokenPropertyPermission, PropertyPermission, TokenPermissionField} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import "./libraries/UniquePrecompiles.sol";
-import {CrossAddress} from "./TokenMinter.sol";
+import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionLimitField, CollectionNestingAndPermission, Property, TokenPropertyPermission, PropertyPermission, TokenPermissionField} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
+import "./UniquePrecompiles.sol";
 
 struct DefaultTokenPropertyPermission {
     bool isMutable;
@@ -79,7 +78,6 @@ abstract contract CollectionMinter is UniquePrecompiles {
         CollectionNestingAndPermission memory nesting_settings,
         CollectionLimitValue[] memory _limits,
         Property[] memory _customCollectionProperties,
-        // CollectionMode mode,
         TokenPropertyPermission[] memory _customTokenPropertyPermissions
     ) internal returns (address) {
         CreateCollectionData memory data;

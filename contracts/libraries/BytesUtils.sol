@@ -31,9 +31,7 @@ library BytesUtils {
                 let end := add(add(haystack, 32), sub(hlen, nlen))
                 end := add(end, 1) // Adjust end to be inclusive
 
-                for {
-
-                } lt(ptr, end) {
+                for {} lt(ptr, end) {
                     ptr := add(ptr, 1)
                 } {
                     if eq(keccak256(ptr, nlen), keccak256(nptr, nlen)) {

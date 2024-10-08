@@ -8,7 +8,7 @@ it("EVM: Can mint breeding contract", async () => {
 
   const Factory = await ethers.getContractFactory("BreedingGame", {});
   const breeder = await Factory.connect(owner1).deploy({
-    gasLimit: 6_000_000,
+    gasLimit: 4_500_000,
     value: parseEther("2"),
   });
   await breeder.waitForDeployment();

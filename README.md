@@ -11,8 +11,10 @@ This repository contains smart contracts for minting collections and tokens usin
       - [Attribute](#attribute)
       - [CrossAddress](#crossaddress)
     - [Contracts](#contracts)
-      - [`CollectionMinter.sol`](#uniquev2collectionmintersol)
-      - [`TokenMinter.sol`](#uniquev2tokenmintersol)
+      - [`CollectionMinter.sol`](#collectionmintersol)
+      - [`TokenMinter.sol`](#tokenmintersol)
+      - [TokenManager.sol](#tokenmanagersol)
+      - [`AddressValidator.sol`](#addressvalidatorsol)
   - [Example Usage](#example-usage)
   - [Run tests](#run-tests)
 
@@ -54,10 +56,15 @@ The `AddressUtils` library provides helper methods to work with the `CrossAddres
 
 Provides functions to create collections in the Unique Schema V2.
 
-| Function                                                                                        |                                                                                                                   |
-| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `constructor(bool _mutable, bool _admin, bool _tokenOwner)`                                     | Initializes the contract and sets the default permissions for token properties mutation                           |
-| `_createCollection(string _name, string _description, string _symbol, string _collectionCover)` | Creates a collection with specified name, description, symbol, collection cover, and allowed nesting permissions. |
+| `constructor(bool _mutable, bool _admin, bool _tokenOwner)`                             |
+| --------------------------------------------------------------------------------------- |
+| Initializes the contract and sets the default permissions for token properties mutation |
+
+---
+
+| `_createCollection(string _name, string _description, string _symbol, string _collectionCover)`                   |
+| ----------------------------------------------------------------------------------------------------------------- |
+| Creates a collection with specified name, description, symbol, collection cover, and allowed nesting permissions. |
 
 #### [`TokenMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/TokenMinter.sol)
 
@@ -65,9 +72,53 @@ Provides functions to create collections in the Unique Schema V2.
 
 Provides functions to create tokens in the Unique Schema V2.
 
-| Function                                                                                                                          |                                                                                                    |
-| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `_createToken(address _collectionAddress, string _image, Attribute[] _attributes, CrossAddress _to) internal returns (uint256)  ` | Internal function to create a new token with specified image and attributes in a given collection. |
+| `_createToken(address _collectionAddress, string _image, Attribute[] _attributes, CrossAddress _to) internal returns (uint256)` |
+| ------------------------------------------------------------------------------------------------------------------------------- |
+| Internal function to create a new token with specified image and attributes in a given collection.                              |
+
+#### [TokenManager.sol](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/TokenManager.sol)
+
+`import "@unique-nft/contracts/TokenManager.sol";`
+
+Provides utility functions for managing token data, such as setting and retrieving images and traits for tokens within a collection.
+
+| `_setImage(address _collection, uint256 _tokenId, bytes memory _newImage) internal` |
+| ----------------------------------------------------------------------------------- |
+| Sets a new image for a specific token in a collection.                              |
+
+---
+
+| `_setTrait(address _collection, uint256 _tokenId, bytes memory _traitType, bytes memory _traitValue) internal` |
+| -------------------------------------------------------------------------------------------------------------- |
+| Sets a new trait (attribute) for a specific token in a collection.                                             |
+
+---
+
+| `_getImage(address _collection, uint256 _tokenId) internal view returns (bytes memory)` |
+| --------------------------------------------------------------------------------------- |
+| Retrieves the image data of a specific token in a collection.                           |
+
+---
+
+| `_getTraitValue(address _collection, uint256 _tokenId, bytes memory _traitType) internal view returns (bytes memory)` |
+| --------------------------------------------------------------------------------------------------------------------- |
+| Retrieves the value of a specific trait for a token in a collection.                                                  |
+
+#### [`AddressValidator.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/AddressValidator.sol)
+
+`import "@unique-nft/contracts/AddressValidator";`
+
+Provides modifiers for validating addresses in token-related operations, ensuring that the caller is authorized.
+
+| `onlyTokenOwner(uint256 _tokenId, address collectionAddress)`                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Restricts access to the owner of the token with ID `_tokenId` in the collection at `collectionAddress`. Reverts if `msg.sender` is not the token owner. |
+
+---
+
+| `onlyMessageSender(CrossAddress memory _crossAddress)`                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------- |
+| Restricts access to the address represented by `_crossAddress`. Reverts if `_crossAddress` does not match `msg.sender`. |
 
 ## Example Usage
 

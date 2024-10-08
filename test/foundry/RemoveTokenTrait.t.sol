@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import "forge-std/Test.sol";
-import "../../contracts/libraries/utils/TokenDataUtils.sol";
+import "../../contracts/libraries/TokenDataUtils.sol";
 
 contract RemoveTraitTest is Test {
     using TokenDataUtils for *;

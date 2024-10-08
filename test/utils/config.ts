@@ -1,5 +1,8 @@
 import * as dotenv from "dotenv";
-import { ContractHelpers__factory, CollectionHelpers__factory } from "../../typechain-types";
+import {
+  ContractHelpers__factory,
+  CollectionHelpers__factory,
+} from "../../typechain-types";
 dotenv.config();
 
 const getConfig = () => {

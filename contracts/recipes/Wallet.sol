@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import {UniqueFungible} from "@unique-nft/solidity-interfaces/contracts/UniqueFungible.sol";
-import {UniquePrecompiles} from "../libraries/UniquePrecompiles.sol";
+import {UniquePrecompiles} from "../UniquePrecompiles.sol";
 import {CollectionMinter} from "../CollectionMinter.sol";
 
 contract Wallet is CollectionMinter {
