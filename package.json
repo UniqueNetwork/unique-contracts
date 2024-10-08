@@ -32,8 +32,9 @@
     "ci": "yarn compile:f && yarn test:f",
     "prepublishOnly": "yarn ci",
     "changeset": "npx changeset",
-    "build": "rm -r dist && mkdir -p dist && cp -r package.json README.md CHANGELOG.md .changeset dist/ && rsync -a contracts/ dist/",
-    "local-release": "yarn ci && cd ./dist && changeset version && changeset publish"
+    "remove-dist": "rm -rf dist",
+    "build": "yarn remove-dist && mkdir -p dist && cp -r package.json README.md CHANGELOG.md .changeset dist/ && rsync -a contracts/ dist/",
+    "local-release": "yarn ci && cd ./dist && changeset version && changeset publish && yarn remove-dist"
   },
   "dependencies": {
     "@unique-nft/solidity-interfaces": "^1.0.1"
