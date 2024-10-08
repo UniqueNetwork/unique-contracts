@@ -5,7 +5,7 @@
 This repository contains smart contracts for minting collections and tokens using Solidity in the [Unique Schema V2](https://docs.uniquenetwork.dev/reference/schemas).
 
 - [Unique Network | Contracts](#unique-network--contracts)
-  - [Install](#install)
+  - [Installation](#installation)
   - [API](#api)
     - [Structs](#structs)
       - [Attribute](#attribute)
@@ -16,7 +16,7 @@ This repository contains smart contracts for minting collections and tokens usin
   - [Example Usage](#example-usage)
   - [Run tests](#run-tests)
 
-## Install
+## Installation
 
 ```sh
 npm install @unique-nft/contracts
