@@ -2,8 +2,8 @@
 pragma solidity 0.8.24;
 
 import {UniqueFungible} from "@unique-nft/solidity-interfaces/contracts/UniqueFungible.sol";
-import {UniquePrecompiles} from "../libraries/UniquePrecompiles.sol";
-import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
+import {UniquePrecompiles} from "@unique-nft/contracts/contracts/libraries/UniquePrecompiles.sol";
+import {UniqueV2CollectionMinter} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
 
 contract Wallet is UniqueV2CollectionMinter {
     address private feeAsset;

@@ -16,7 +16,7 @@ struct DefaultTokenPropertyPermission {
  * @dev Abstract contract for minting collections in the Unique V2 Schema.
  */
 abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
-    DefaultTokenPropertyPermission private s_defaultTokemPropertyPermissions;
+    DefaultTokenPropertyPermission private s_defaultTokenPropertyPermissions;
 
     /**
      * @dev Initializes the contract with default property permissions.
@@ -25,11 +25,11 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
      * @param _admin Boolean indicating if the collection admin has permissions by default.
      */
     constructor(bool _mutable, bool _admin, bool _tokenOwner) {
-        s_defaultTokemPropertyPermissions = DefaultTokenPropertyPermission(_mutable, _admin, _tokenOwner);
+        s_defaultTokenPropertyPermissions = DefaultTokenPropertyPermission(_mutable, _admin, _tokenOwner);
     }
 
     /**
-     * @dev Internal function to create a new collection with default settings.
+     * @dev Function to create a new collection with default settings.
      *
      * @param _name The name of the collection to be created.
      * @param _description A brief description of the collection.
@@ -64,7 +64,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     }
 
     /**
-     * @dev Internal function to create a new collection.
+     * @dev Function to create a new collection.
      * @param _name Name of the collection.
      * @param _description Description of the collection.
      * @param _symbol Symbol prefix for the tokens in the collection.
@@ -95,7 +95,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         data.nesting_settings = nesting_settings;
         data.pending_sponsor = _pending_sponsor;
 
-        DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokemPropertyPermissions;
+        DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokenPropertyPermissions;
 
         data.token_property_permissions = _withUniqueV2TokenPropertyPermissions(
             _customTokenPropertyPermissions,
@@ -121,7 +121,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
         bool _defaultMutable,
         bool _defaultCollectionAdmin,
         bool _defaultTokenOwner
-    ) internal pure returns (TokenPropertyPermission[] memory) {
+    ) private pure returns (TokenPropertyPermission[] memory) {
         uint256 tppLength = _customTPPs.length + 8;
         TokenPropertyPermission[] memory extendedTPPs = new TokenPropertyPermission[](tppLength);
 
@@ -158,7 +158,7 @@ abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
     function _withUniqueV2CollectionProperties(
         Property[] memory customCollectionProperties,
         string memory coverImage
-    ) internal pure returns (Property[] memory) {
+    ) private pure returns (Property[] memory) {
         uint256 totalPropertiesLength = customCollectionProperties.length + 3;
         Property[] memory propertiesV2 = new Property[](totalPropertiesLength);
 

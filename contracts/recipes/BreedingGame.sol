@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {UniqueNFTMetadata} from "../libraries/UniqueNFTMetadata.sol";
-import {Converter} from "../libraries/utils/Converter.sol";
-import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute} from "../UniqueV2TokenMinter.sol";
-import {AddressUtils, CrossAddress} from "../libraries/utils/AddressUtils.sol";
+import {UniqueNFTMetadata} from "@unique-nft/contracts/contracts/libraries/UniqueNFTMetadata.sol";
+import {Converter} from "@unique-nft/contracts/contracts/libraries/utils/Converter.sol";
+import {UniqueV2CollectionMinter} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
+import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/UniqueV2TokenMinter.sol";
+import {AddressUtils, CrossAddress} from "@unique-nft/contracts/contracts/libraries/utils/AddressUtils.sol";
 
 /// @notice TokenStats represents an NFT's attributes and lifecycle.
 struct TokenStats {
@@ -23,11 +23,9 @@ struct TokenStats {
 ///      You can see the example usage:
 ///      - For Ethereum accounts: use your Ethereum address in the CrossAddress structure when calling `breed`.
 ///      - For Substrate accounts: use your Substrate address in the CrossAddress structure when calling `breed`.
-contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     /// @dev This library allows setting NFT's images and traits.
     using UniqueNFTMetadata for address;
-    /// @dev This library provides utility functions for CrossAddress and address operations.
-    using AddressUtils for *;
     /// @dev This library provides data type conversion utilities.
     using Converter for *;
 
@@ -53,7 +51,7 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     modifier onlyTokenOwner(uint256 _tokenId) {
         require(
             AddressUtils.messageSenderIsTokenOwner(COLLECTION_ADDRESS, _tokenId),
-            "BreedingSimulator: msg.sender is not the owner"
+            "BreedingGame: msg.sender is not the owner"
         );
         _;
     }
@@ -147,6 +145,15 @@ contract BreedingSimulator is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      */
     function recover(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
         _setImage(_tokenId, false);
+    }
+
+    function getGladiator() external view returns (uint256) {
+        return s_gladiator;
+    }
+
+    function canEvolve(uint256 _tokenId) external view returns (bool) {
+        TokenStats memory tokenStats = s_tokenStats[_tokenId];
+        return tokenStats.experience >= EVOLUTION_EXPERIENCE && tokenStats.generation == 0;
     }
 
     /**

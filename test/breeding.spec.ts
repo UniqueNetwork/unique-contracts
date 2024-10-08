@@ -6,7 +6,7 @@ import { Address } from "@unique-nft/utils";
 it("EVM: Can mint breeding contract", async () => {
   const [owner1, owner2] = await ethers.getSigners();
 
-  const Factory = await ethers.getContractFactory("BreedingSimulator", {});
+  const Factory = await ethers.getContractFactory("BreedingGame", {});
   const breeder = await Factory.connect(owner1).deploy({
     gasLimit: 6_000_000,
     value: parseEther("2"),
