@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {UniqueNFTMetadata} from "@unique-nft/contracts/contracts/libraries/UniqueNFTMetadata.sol";
-import {Converter} from "@unique-nft/contracts/contracts/libraries/utils/Converter.sol";
-import {CollectionMinter} from "@unique-nft/contracts/contracts/CollectionMinter.sol";
-import {TokenMinter, Attribute} from "@unique-nft/contracts/contracts/TokenMinter.sol";
-import {AddressUtils, CrossAddress} from "@unique-nft/contracts/contracts/libraries/utils/AddressUtils.sol";
+import {UniqueNFTMetadata} from "../libraries/UniqueNFTMetadata.sol";
+import {Converter} from "../libraries/utils/Converter.sol";
+import {CollectionMinter} from "../CollectionMinter.sol";
+import {TokenMinter, Attribute} from "../TokenMinter.sol";
+import {AddressUtils, CrossAddress} from "../libraries/utils/AddressUtils.sol";
 
 /// @notice TokenStats represents an NFT's attributes and lifecycle.
 struct TokenStats {

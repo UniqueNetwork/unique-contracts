@@ -3,8 +3,8 @@ pragma solidity 0.8.24;
 
 import {UniqueNFT, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 import {Property, CollectionMode, TokenPropertyPermission, CollectionLimitValue, CollectionLimitField, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {CollectionMinter} from "@unique-nft/contracts/contracts/CollectionMinter.sol";
-import {TokenMinter, Attribute} from "@unique-nft/contracts/contracts/TokenMinter.sol";
+import {CollectionMinter} from "../CollectionMinter.sol";
+import {TokenMinter, Attribute} from "../TokenMinter.sol";
 
 /**
  * @notice This struct represents an event configuration for POAP tokens.
@@ -101,7 +101,6 @@ contract POAP is CollectionMinter, TokenMinter {
             CollectionNestingAndPermission({token_owner: false, collection_admin: false, restricted: new address[](0)}),
             collectionLimits,
             new Property[](0),
-            CrossAddress({eth: msg.sender, sub: 0}),
             new TokenPropertyPermission[](0)
         );
 

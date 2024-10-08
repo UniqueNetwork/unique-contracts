@@ -82,11 +82,12 @@ contract MarketCollectionCreate is CollectionMinter {
             }),
             collectionLimits,
             new Property[](0),
-            CrossAddress({eth: address(msg.sender), sub: 0}),
             new TokenPropertyPermission[](0)
         );
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
+
+        collection.setCollectionSponsorCross(CrossAddress({eth: msg.sender, sub: 0}));
         COLLECTION_HELPERS.makeCollectionERC721MetadataCompatible(collectionAddress, _collectionCover);
         collection.changeCollectionOwnerCross(CrossAddress(msg.sender, 0));
 

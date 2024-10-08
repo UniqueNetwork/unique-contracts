@@ -42,8 +42,7 @@ abstract contract CollectionMinter is UniquePrecompiles {
         string memory _name,
         string memory _description,
         string memory _symbol,
-        string memory _collectionCover,
-        CrossAddress memory _pending_sponsor
+        string memory _collectionCover
     ) internal returns (address) {
         return
             _createCollection(
@@ -58,7 +57,6 @@ abstract contract CollectionMinter is UniquePrecompiles {
                 }),
                 new CollectionLimitValue[](0),
                 new Property[](0),
-                _pending_sponsor,
                 new TokenPropertyPermission[](0)
             );
     }
@@ -70,7 +68,6 @@ abstract contract CollectionMinter is UniquePrecompiles {
      * @param _symbol Symbol prefix for the tokens in the collection.
      * @param _collectionCover URL of the cover image for the collection.
      * @param _customCollectionProperties Array of custom properties for the collection.
-     * @param _pending_sponsor Collection sponsor address
      * @param _customTokenPropertyPermissions Array of custom token property permissions.
      * @return Address of the created collection.
      */
@@ -83,7 +80,6 @@ abstract contract CollectionMinter is UniquePrecompiles {
         CollectionLimitValue[] memory _limits,
         Property[] memory _customCollectionProperties,
         // CollectionMode mode,
-        CrossAddress memory _pending_sponsor,
         TokenPropertyPermission[] memory _customTokenPropertyPermissions
     ) internal returns (address) {
         CreateCollectionData memory data;
@@ -93,7 +89,6 @@ abstract contract CollectionMinter is UniquePrecompiles {
         data.token_prefix = _symbol;
         data.limits = _limits;
         data.nesting_settings = nesting_settings;
-        data.pending_sponsor = _pending_sponsor;
 
         DefaultTokenPropertyPermission memory defaultTPPs = s_defaultTokenPropertyPermissions;
 

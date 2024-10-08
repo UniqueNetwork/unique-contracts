@@ -3,8 +3,8 @@ pragma solidity 0.8.24;
 
 import {UniqueNFT, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 import {Property, CollectionLimitValue, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {CollectionMinter, CollectionMode, TokenPropertyPermission} from "@unique-nft/contracts/contracts/CollectionMinter.sol";
-import {TokenMinter, Attribute} from "@unique-nft/contracts/contracts/TokenMinter.sol";
+import {CollectionMinter, CollectionMode, TokenPropertyPermission} from "../CollectionMinter.sol";
+import {TokenMinter, Attribute} from "../TokenMinter.sol";
 
 /**
  * @title Minter
@@ -65,7 +65,6 @@ contract Minter is CollectionMinter, TokenMinter {
             nesting_settings,
             new CollectionLimitValue[](0),
             new Property[](0),
-            CrossAddress({eth: msg.sender, sub: 0})
             new TokenPropertyPermission[](0)
         );
 
