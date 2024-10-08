@@ -3,7 +3,7 @@ pragma solidity >=0.8.18 <=0.8.24;
 
 import {CollectionHelpers, CreateCollectionData, CollectionMode, CollectionLimitValue, CollectionNestingAndPermission, Property, TokenPropertyPermission, PropertyPermission, TokenPermissionField} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
 import "./libraries/UniquePrecompiles.sol";
-import {CrossAddress} from "./UniqueV2TokenMinter.sol";
+import {CrossAddress} from "./TokenMinter.sol";
 
 struct DefaultTokenPropertyPermission {
     bool isMutable;
@@ -12,10 +12,10 @@ struct DefaultTokenPropertyPermission {
 }
 
 /**
- * @title UniqueV2CollectionMinter
+ * @title CollectionMinter
  * @dev Abstract contract for minting collections in the Unique V2 Schema.
  */
-abstract contract UniqueV2CollectionMinter is UniquePrecompiles {
+abstract contract CollectionMinter is UniquePrecompiles {
     DefaultTokenPropertyPermission private s_defaultTokenPropertyPermissions;
 
     /**

@@ -14,10 +14,10 @@ struct Attribute {
 }
 
 /**
- * @title UniqueV2TokenMinter
+ * @title TokenMinter
  * @dev Abstract contract for minting tokens in the Unique V2 Schema.
  */
-abstract contract UniqueV2TokenMinter {
+abstract contract TokenMinter {
     /**
      * @dev Internal function to create a new token.
      * @param _collectionAddress Address of the collection to mint the token in.

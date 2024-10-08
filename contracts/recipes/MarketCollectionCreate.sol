@@ -3,20 +3,20 @@ pragma solidity 0.8.24;
 
 import {UniqueNFT, CollectionLimit} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 import {Property, TokenPropertyPermission, CollectionLimitValue, CollectionLimitField, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
-import {CrossAddress} from "../UniqueV2TokenMinter.sol";
+import {CollectionMinter} from "../CollectionMinter.sol";
+import {CrossAddress} from "../TokenMinter.sol";
 
 /**
  * @title MarketCollectionCreate
  * @notice This contract integrates collection creation using Ethereum wallets on a marketplace.
  */
-contract MarketCollectionCreate is UniqueV2CollectionMinter {
+contract MarketCollectionCreate is CollectionMinter {
 
     event CollectionCreated(uint256 collectionId, address collectionAddress);
 
     error IncorrectFee();
 
-    constructor() payable UniqueV2CollectionMinter(true, true, true) {}
+    constructor() payable CollectionMinter(true, true, true) {}
 
     receive() external payable {}
 

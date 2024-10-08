@@ -3,8 +3,8 @@ pragma solidity 0.8.24;
 
 import {UniqueNFTMetadata} from "@unique-nft/contracts/contracts/libraries/UniqueNFTMetadata.sol";
 import {Converter} from "@unique-nft/contracts/contracts/libraries/utils/Converter.sol";
-import {UniqueV2CollectionMinter} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/UniqueV2TokenMinter.sol";
+import {CollectionMinter} from "@unique-nft/contracts/contracts/CollectionMinter.sol";
+import {TokenMinter, Attribute} from "@unique-nft/contracts/contracts/TokenMinter.sol";
 import {AddressUtils, CrossAddress} from "@unique-nft/contracts/contracts/libraries/utils/AddressUtils.sol";
 
 /// @notice TokenStats represents an NFT's attributes and lifecycle.
@@ -23,7 +23,7 @@ struct TokenStats {
 ///      You can see the example usage:
 ///      - For Ethereum accounts: use your Ethereum address in the CrossAddress structure when calling `breed`.
 ///      - For Substrate accounts: use your Substrate address in the CrossAddress structure when calling `breed`.
-contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+contract BreedingGame is CollectionMinter, TokenMinter {
     /// @dev This library allows setting NFT's images and traits.
     using UniqueNFTMetadata for address;
     /// @dev This library provides data type conversion utilities.
@@ -57,9 +57,9 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     }
 
     /// @dev This contract mints a fighting collection in the constructor.
-    ///      UniqueV2CollectionMinter(true, true, false) means token attributes will be:
+    ///      CollectionMinter(true, true, false) means token attributes will be:
     ///      mutable (true) by the collection admin (true), but not by the token owner (false).
-    constructor() payable UniqueV2CollectionMinter(true, true, false) {
+    constructor() payable CollectionMinter(true, true, false) {
         // Monsters can be of generation 0 or 1. Each generation has its own IPFS base URL.
         s_generationIpfs[
             0

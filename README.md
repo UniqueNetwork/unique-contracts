@@ -11,8 +11,8 @@ This repository contains smart contracts for minting collections and tokens usin
       - [Attribute](#attribute)
       - [CrossAddress](#crossaddress)
     - [Contracts](#contracts)
-      - [`UniqueV2CollectionMinter.sol`](#uniquev2collectionmintersol)
-      - [`UniqueV2TokenMinter.sol`](#uniquev2tokenmintersol)
+      - [`CollectionMinter.sol`](#uniquev2collectionmintersol)
+      - [`TokenMinter.sol`](#uniquev2tokenmintersol)
   - [Example Usage](#example-usage)
   - [Run tests](#run-tests)
 
@@ -48,9 +48,9 @@ The `AddressUtils` library provides helper methods to work with the `CrossAddres
 
 ### Contracts
 
-#### [`UniqueV2CollectionMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/UniqueV2CollectionMinter.sol)
+#### [`CollectionMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/CollectionMinter.sol)
 
-`import "@unique-nft/contracts/UniqueV2CollectionMinter";`
+`import "@unique-nft/contracts/CollectionMinter";`
 
 Provides functions to create collections in the Unique Schema V2.
 
@@ -59,9 +59,9 @@ Provides functions to create collections in the Unique Schema V2.
 | `constructor(bool _mutable, bool _admin, bool _tokenOwner)`                                     | Initializes the contract and sets the default permissions for token properties mutation                           |
 | `_createCollection(string _name, string _description, string _symbol, string _collectionCover)` | Creates a collection with specified name, description, symbol, collection cover, and allowed nesting permissions. |
 
-#### [`UniqueV2TokenMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/UniqueV2TokenMinter.sol)
+#### [`TokenMinter.sol`](https://github.com/UniqueNetwork/unique-contracts/blob/main/contracts/TokenMinter.sol)
 
-`import "@unique-nft/contracts/UniqueV2TokenMinter";`
+`import "@unique-nft/contracts/TokenMinter";`
 
 Provides functions to create tokens in the Unique Schema V2.
 
