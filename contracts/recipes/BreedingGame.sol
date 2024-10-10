@@ -86,11 +86,12 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
             ".png"
         );
 
-        Attribute[] memory attributes = new Attribute[](3);
+        Attribute[] memory attributes = new Attribute[](4);
         // Each NFT has 3 traits. These traits are mutated when the `_fight` method is invoked.
         attributes[0] = Attribute({trait_type: "Experience", value: "0"});
         attributes[1] = Attribute({trait_type: "Victories", value: "0"});
         attributes[2] = Attribute({trait_type: "Defeats", value: "0"});
+        attributes[3] = Attribute({trait_type: "Generation", value: "0"});
 
         uint256 tokenId = _createToken(COLLECTION_ADDRESS, randomImage, attributes, _owner);
         s_tokenStats[tokenId] = TokenStats({
@@ -112,7 +113,8 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
         require(tokenStats.experience >= EVOLUTION_EXPERIENCE, "Experience not enough");
         require(tokenStats.generation == 0, "Already evolved");
 
-        s_tokenStats[_tokenId].generation += 1;
+        s_tokenStats[_tokenId].generation = 1;
+        _setTrait(COLLECTION_ADDRESS, _tokenId, "Generation", "1");
         _setImage(_tokenId, false);
     }
 

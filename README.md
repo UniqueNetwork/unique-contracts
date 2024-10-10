@@ -5,7 +5,7 @@
 This repository contains smart contracts for minting collections and tokens using Solidity in the [Unique Schema V2](https://docs.uniquenetwork.dev/reference/schemas).
 
 - [Unique Network | Contracts](#unique-network--contracts)
-  - [Installation](#installation)
+  - [Installation and configuration](#installation-and-configuration)
   - [API](#api)
     - [Structs](#structs)
       - [Attribute](#attribute)
@@ -18,11 +18,30 @@ This repository contains smart contracts for minting collections and tokens usin
   - [Example Usage](#example-usage)
   - [Run tests](#run-tests)
 
-## Installation
+## Installation and configuration
+
+Install packages:
 
 ```sh
 npm install @unique-nft/contracts
 ```
+
+Find the RPC endpoint in the [official documentation](https://docs.unique.network/reference). You can get `OPL` (Opal testnet) tokens for free at https://t.me/unique2faucet_opal_bot
+
+> [!IMPORTANT]
+> Configure your project:
+>
+> 1. Compatible Solidity versions are `>=0.8.18 <=0.8.24`
+> 2. Use via-IR compilation pipeline.
+>
+> In hardhat.config file set:
+>
+> ```ts
+>   solidity: {
+>     version: "0.8.24",
+>     settings: { viaIR: true },
+>  },
+> ```
 
 ## API
 
