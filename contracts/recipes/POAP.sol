@@ -3,8 +3,8 @@ pragma solidity 0.8.24;
 
 import {UniqueNFT, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 import {Property, CollectionMode, TokenPropertyPermission, CollectionLimitValue, CollectionLimitField, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {UniqueV2CollectionMinter} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/UniqueV2TokenMinter.sol";
+import {CollectionMinter} from "../CollectionMinter.sol";
+import {TokenMinter, Attribute} from "../TokenMinter.sol";
 
 /**
  * @notice This struct represents an event configuration for POAP tokens.
@@ -32,7 +32,7 @@ struct EventConfig {
  * This contract is supposed to be sponsored:
  * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/poap.spec.ts
  */
-contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+contract POAP is CollectionMinter, TokenMinter {
     /// @notice Only one NFT per account can be minted.
     uint256 public constant ACCOUNT_TOKEN_LIMIT = 1;
 
@@ -58,7 +58,7 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * - token owner has no permissions to change properties
      * @param _collectionCreationFee The fee required to create a collection.
      */
-    constructor(uint256 _collectionCreationFee) payable UniqueV2CollectionMinter(true, true, false) {
+    constructor(uint256 _collectionCreationFee) payable CollectionMinter(true, true, false) {
         s_collectionCreationFee = _collectionCreationFee;
     }
 
@@ -101,7 +101,6 @@ contract POAP is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             CollectionNestingAndPermission({token_owner: false, collection_admin: false, restricted: new address[](0)}),
             collectionLimits,
             new Property[](0),
-            CrossAddress({eth: msg.sender, sub: 0}),
             new TokenPropertyPermission[](0)
         );
 

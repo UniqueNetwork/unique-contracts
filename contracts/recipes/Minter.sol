@@ -3,8 +3,8 @@ pragma solidity 0.8.24;
 
 import {UniqueNFT, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
 import {Property, CollectionLimitValue, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {UniqueV2CollectionMinter, CollectionMode, TokenPropertyPermission} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/UniqueV2TokenMinter.sol";
+import {CollectionMinter, CollectionMode, TokenPropertyPermission} from "../CollectionMinter.sol";
+import {TokenMinter, Attribute} from "../TokenMinter.sol";
 
 /**
  * @title Minter
@@ -13,10 +13,10 @@ import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/Un
  *
  * @dev Contract for minting collections and tokens in the Unique Schema V2.
  * It sets sponsoring for each collection to create a gasless experience for end users.
- * Inherits from UniqueV2CollectionMinter and UniqueV2TokenMinter.
+ * Inherits from CollectionMinter and TokenMinter.
  * See the example in tests https://github.com/UniqueNetwork/unique-contracts/blob/main/test/minter.spec.ts
  */
-contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
+contract Minter is CollectionMinter, TokenMinter {
     /// @dev track collection owners to restrict minting
     mapping(address collection => address owner) private s_collectionOwner;
 
@@ -36,7 +36,7 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      * - collectionAdmin has permissions to change properties.
      * - token owner has no permissions to change properties
      */
-    constructor() payable UniqueV2CollectionMinter(true, true, false) {}
+    constructor() payable CollectionMinter(true, true, false) {}
 
     receive() external payable {}
 
@@ -65,7 +65,6 @@ contract Minter is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             nesting_settings,
             new CollectionLimitValue[](0),
             new Property[](0),
-            CrossAddress({eth: msg.sender, sub: 0})
             new TokenPropertyPermission[](0)
         );
 

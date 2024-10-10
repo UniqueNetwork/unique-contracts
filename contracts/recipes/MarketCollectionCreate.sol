@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {UniqueNFT, CollectionLimit} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
-import {Property, TokenPropertyPermission, CollectionLimitValue, CollectionLimitField, CollectionNestingAndPermission} from "@unique-nft/solidity-interfaces/contracts/CollectionHelpers.sol";
-import {UniqueV2CollectionMinter} from "../UniqueV2CollectionMinter.sol";
-import {CrossAddress} from "../UniqueV2TokenMinter.sol";
+import {CollectionMinter, Property, TokenPropertyPermission, CollectionLimitValue, CollectionLimitField, CollectionNestingAndPermission} from "../CollectionMinter.sol";
+import {CrossAddress, UniqueNFT} from "../TokenMinter.sol";
 
 /**
  * @title MarketCollectionCreate
  * @notice This contract integrates collection creation using Ethereum wallets on a marketplace.
  */
-contract MarketCollectionCreate is UniqueV2CollectionMinter {
-
+contract MarketCollectionCreate is CollectionMinter {
     event CollectionCreated(uint256 collectionId, address collectionAddress);
 
     error IncorrectFee();
 
-    constructor() payable UniqueV2CollectionMinter(true, true, true) {}
+    constructor() payable CollectionMinter(true, true, true) {}
 
     receive() external payable {}
 
@@ -57,12 +54,9 @@ contract MarketCollectionCreate is UniqueV2CollectionMinter {
 
         // 1.2. Set collection token limit
         if (_tokenLimit > 0) {
-            collectionLimits[1] = CollectionLimitValue({
-                field: CollectionLimitField.TokenLimit,
-                value: _tokenLimit
-            });
+            collectionLimits[1] = CollectionLimitValue({field: CollectionLimitField.TokenLimit, value: _tokenLimit});
         }
-        
+
         // 1.3 Transfers are not allowed
         collectionLimits[2] = CollectionLimitValue({
             field: CollectionLimitField.TransferEnabled,
@@ -78,15 +72,16 @@ contract MarketCollectionCreate is UniqueV2CollectionMinter {
             CollectionNestingAndPermission({
                 token_owner: _nestingPermissionsTokenOwner,
                 collection_admin: _nestingPermissionsCollectionAdmin,
-                restricted: new address[](0) 
+                restricted: new address[](0)
             }),
             collectionLimits,
             new Property[](0),
-            CrossAddress({eth: address(msg.sender), sub: 0}),
             new TokenPropertyPermission[](0)
         );
 
         UniqueNFT collection = UniqueNFT(collectionAddress);
+
+        collection.setCollectionSponsorCross(CrossAddress({eth: msg.sender, sub: 0}));
         COLLECTION_HELPERS.makeCollectionERC721MetadataCompatible(collectionAddress, _collectionCover);
         collection.changeCollectionOwnerCross(CrossAddress(msg.sender, 0));
 

@@ -2,10 +2,10 @@
 pragma solidity 0.8.24;
 
 import {UniqueFungible} from "@unique-nft/solidity-interfaces/contracts/UniqueFungible.sol";
-import {UniquePrecompiles} from "@unique-nft/contracts/contracts/libraries/UniquePrecompiles.sol";
-import {UniqueV2CollectionMinter} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
+import {UniquePrecompiles} from "../UniquePrecompiles.sol";
+import {CollectionMinter} from "../CollectionMinter.sol";
 
-contract Wallet is UniqueV2CollectionMinter {
+contract Wallet is CollectionMinter {
     address private feeAsset;
     address private vendor;
     address public owner;
@@ -23,7 +23,7 @@ contract Wallet is UniqueV2CollectionMinter {
         _;
     }
 
-    constructor(address _owner, uint32 _feeAsset, address _vendor) UniqueV2CollectionMinter(true, false, true) {
+    constructor(address _owner, uint32 _feeAsset, address _vendor) CollectionMinter(true, false, true) {
         require(_owner != address(0), "Owner address cannot be zero");
         feeAsset = COLLECTION_HELPERS.collectionAddress(_feeAsset);
         s_executionFee = 1e16;

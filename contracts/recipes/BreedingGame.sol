@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
-import {UniqueNFTMetadata} from "@unique-nft/contracts/contracts/libraries/UniqueNFTMetadata.sol";
-import {Converter} from "@unique-nft/contracts/contracts/libraries/utils/Converter.sol";
-import {UniqueV2CollectionMinter} from "@unique-nft/contracts/contracts/UniqueV2CollectionMinter.sol";
-import {UniqueV2TokenMinter, Attribute} from "@unique-nft/contracts/contracts/UniqueV2TokenMinter.sol";
-import {AddressUtils, CrossAddress} from "@unique-nft/contracts/contracts/libraries/utils/AddressUtils.sol";
+import {Converter} from "../libraries/Converter.sol";
+import {CollectionMinter} from "../CollectionMinter.sol";
+import {TokenMinter, Attribute, CrossAddress} from "../TokenMinter.sol";
+import {TokenManager} from "../TokenManager.sol";
+import {AddressValidator} from "../AddressValidator.sol";
 
 /// @notice TokenStats represents an NFT's attributes and lifecycle.
 struct TokenStats {
@@ -23,9 +23,7 @@ struct TokenStats {
 ///      You can see the example usage:
 ///      - For Ethereum accounts: use your Ethereum address in the CrossAddress structure when calling `breed`.
 ///      - For Substrate accounts: use your Substrate address in the CrossAddress structure when calling `breed`.
-contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
-    /// @dev This library allows setting NFT's images and traits.
-    using UniqueNFTMetadata for address;
+contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressValidator {
     /// @dev This library provides data type conversion utilities.
     using Converter for *;
 
@@ -47,19 +45,10 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
     /// @dev Token ID awaiting for an opponent.
     uint256 private s_gladiator;
 
-    /// @dev Checks if the msg.sender is the owner of the NFT.
-    modifier onlyTokenOwner(uint256 _tokenId) {
-        require(
-            AddressUtils.messageSenderIsTokenOwner(COLLECTION_ADDRESS, _tokenId),
-            "BreedingGame: msg.sender is not the owner"
-        );
-        _;
-    }
-
     /// @dev This contract mints a fighting collection in the constructor.
-    ///      UniqueV2CollectionMinter(true, true, false) means token attributes will be:
+    ///      CollectionMinter(true, true, false) means token attributes will be:
     ///      mutable (true) by the collection admin (true), but not by the token owner (false).
-    constructor() payable UniqueV2CollectionMinter(true, true, false) {
+    constructor() payable CollectionMinter(true, true, false) {
         // Monsters can be of generation 0 or 1. Each generation has its own IPFS base URL.
         s_generationIpfs[
             0
@@ -97,11 +86,12 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             ".png"
         );
 
-        Attribute[] memory attributes = new Attribute[](3);
+        Attribute[] memory attributes = new Attribute[](4);
         // Each NFT has 3 traits. These traits are mutated when the `_fight` method is invoked.
         attributes[0] = Attribute({trait_type: "Experience", value: "0"});
         attributes[1] = Attribute({trait_type: "Victories", value: "0"});
         attributes[2] = Attribute({trait_type: "Defeats", value: "0"});
+        attributes[3] = Attribute({trait_type: "Generation", value: "0"});
 
         uint256 tokenId = _createToken(COLLECTION_ADDRESS, randomImage, attributes, _owner);
         s_tokenStats[tokenId] = TokenStats({
@@ -118,12 +108,13 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      *         The token's image changes upon evolution.
      * @param _tokenId The ID of the token to evolve.
      */
-    function evolve(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
+    function evolve(uint256 _tokenId) external onlyTokenOwner(_tokenId, COLLECTION_ADDRESS) {
         TokenStats memory tokenStats = s_tokenStats[_tokenId];
         require(tokenStats.experience >= EVOLUTION_EXPERIENCE, "Experience not enough");
         require(tokenStats.generation == 0, "Already evolved");
 
-        s_tokenStats[_tokenId].generation += 1;
+        s_tokenStats[_tokenId].generation = 1;
+        _setTrait(COLLECTION_ADDRESS, _tokenId, "Generation", "1");
         _setImage(_tokenId, false);
     }
 
@@ -132,7 +123,7 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      *         As a result of a battle, the token's traits and image will change.
      * @param _tokenId The ID of the token to enter the arena.
      */
-    function enterArena(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
+    function enterArena(uint256 _tokenId) external onlyTokenOwner(_tokenId, COLLECTION_ADDRESS) {
         if (s_gladiator != 0 && s_gladiator != _tokenId) _fight(s_gladiator, _tokenId);
         else s_gladiator = _tokenId;
     }
@@ -143,7 +134,7 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
      *         Note: Currently, there is no cooldown period, but this can be extended to include one.
      * @param _tokenId The ID of the token to recover.
      */
-    function recover(uint256 _tokenId) external onlyTokenOwner(_tokenId) {
+    function recover(uint256 _tokenId) external onlyTokenOwner(_tokenId, COLLECTION_ADDRESS) {
         _setImage(_tokenId, false);
     }
 
@@ -203,12 +194,12 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
         s_tokenStats[loser] = loserStats;
 
         // Update winner's token attributes.
-        COLLECTION_ADDRESS.setTrait(winner, "Experience", Converter.uint2bytes(winnerStats.experience));
-        COLLECTION_ADDRESS.setTrait(winner, "Victories", Converter.uint2bytes(winnerStats.victories));
+        _setTrait(COLLECTION_ADDRESS, winner, "Experience", Converter.uint2bytes(winnerStats.experience));
+        _setTrait(COLLECTION_ADDRESS, winner, "Victories", Converter.uint2bytes(winnerStats.victories));
 
         // Update loser's token attributes.
-        COLLECTION_ADDRESS.setTrait(loser, "Experience", Converter.uint2bytes(loserStats.experience));
-        COLLECTION_ADDRESS.setTrait(loser, "Defeats", Converter.uint2bytes(loserStats.defeats));
+        _setTrait(COLLECTION_ADDRESS, loser, "Experience", Converter.uint2bytes(loserStats.experience));
+        _setTrait(COLLECTION_ADDRESS, loser, "Defeats", Converter.uint2bytes(loserStats.defeats));
 
         // Make the loser exhausted (change NFT's image).
         _makeExhausted(loser);
@@ -241,7 +232,7 @@ contract BreedingGame is UniqueV2CollectionMinter, UniqueV2TokenMinter {
             extension
         );
 
-        COLLECTION_ADDRESS.setImage(_tokenId, bytes(imageUrl));
+        _setImage(COLLECTION_ADDRESS, _tokenId, bytes(imageUrl));
     }
 
     /**
