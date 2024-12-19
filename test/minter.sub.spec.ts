@@ -4,8 +4,8 @@ import { parseEther } from "ethers";
 import { Address } from "@unique-nft/utils";
 import { expect } from "chai";
 import testConfig from "./utils/config";
-import { Sr25519Account } from "@unique-nft/sdk/sr25519";
-import { Sdk } from "@unique-nft/sdk/full";
+import { Sr25519Account } from "@unique-nft/utils/sr25519";
+import { UniqueChain } from "@unique-nft/sdk";
 
 it("Substrate: Can mint collection for free and mint tokens for free after that", async () => {
   const [minterOwner] = await ethers.getSigners();
@@ -13,7 +13,7 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
   // Generate an empty account
   const user = Sr25519Account.fromUri(Sr25519Account.generateMnemonic());
 
-  const sdk = new Sdk({ baseUrl: testConfig.rest, account: user });
+  const sdk = UniqueChain({ baseUrl: testConfig.rest, account: user });
 
   const balanceMinterOwner = await ethers.provider.getBalance(minterOwner);
 
@@ -23,7 +23,7 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
   // NOTE: get user's balance before minting
   // user will send transactions but for *free*
   const userBalanceBefore = await sdk.balance.get(user);
-  console.log(userBalanceBefore.availableBalance.formatted);
+  console.log(userBalanceBefore.available);
 
   // NOTE: minterOwner deploy Minter contract
   const MinterFactory = await ethers.getContractFactory("Minter");
@@ -61,15 +61,9 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
   // This collection will be automatically sponsored by Minter
   const minterArtifacts = await artifacts.readArtifact("Minter");
 
-  // We do not not want to provide ABI and contract address every time
-  const minterContractSub = await sdk.evm.contractConnect(
-    minterAddress,
-    minterArtifacts.abi,
-  );
-
-  const mintCollectionResult = await minterContractSub.send({
-    funcName: "mintCollection",
-    args: [
+  const mintCollectionResult = await sdk.evm.send({
+    functionName: "mintCollection",
+    functionArgs: [
       "N",
       "NN",
       "NNN",
@@ -81,7 +75,8 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
         sub: Address.extract.substratePublicKey(user.address),
       },
     ],
-    gasLimit: 1_000_000,
+    contract: { address: minterAddress, abi: minterArtifacts.abi },
+    gasLimit: 1_000_000n,
   });
 
   // NOTE: just print minted collection address
@@ -91,9 +86,9 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
 
   // NOTE: user mints token for free!
   // fees will be paid by "Minter" contract
-  await minterContractSub.send({
-    funcName: "mintToken",
-    args: [
+  await sdk.evm.send({
+    functionName: "mintToken",
+    functionArgs: [
       event.args.collectionAddress,
       "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmY7hbSNiwE3ApYp83CHWFdqrcEAM6AvChucBVA6kC1e8u",
       [{ trait_type: "Power", value: "42" }],
@@ -103,12 +98,11 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
         sub: Address.extract.substratePublicKey(user.address),
       },
     ],
-    gasLimit: 1_000_000,
+    contract: { address: minterAddress, abi: minterArtifacts.abi },
+    gasLimit: 1_000_000n,
   });
 
   // NOTE: check that user's balance doesn't change
   const userBalanceAfter = await sdk.balance.get(user);
-  expect(userBalanceAfter.availableBalance.raw).to.deep.eq(
-    userBalanceBefore.availableBalance.raw,
-  );
+  expect(userBalanceAfter.available).to.eq(userBalanceBefore.available);
 });
