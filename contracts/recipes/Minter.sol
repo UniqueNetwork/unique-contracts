@@ -103,6 +103,6 @@ contract Minter is CollectionMinter, TokenMinter {
         Attribute[] memory _attributes,
         CrossAddress memory _tokenOwner
     ) external onlyCollectionOwner(_collectionAddress) {
-        _createToken(_collectionAddress, _image, _attributes, _tokenOwner);
+        _createToken(_collectionAddress, _image, "", "", _attributes, _tokenOwner);
     }
 }

@@ -141,6 +141,8 @@ contract POAP is CollectionMinter, TokenMinter {
         uint256 tokenId = _createToken(
             _collectionAddress,
             collectionEvent.tokenImage,
+            "",
+            "",
             collectionEvent.attributes,
             _owner
         );

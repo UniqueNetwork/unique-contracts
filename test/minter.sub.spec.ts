@@ -4,7 +4,7 @@ import { parseEther } from "ethers";
 import { Address } from "@unique-nft/utils";
 import { expect } from "chai";
 import testConfig from "./utils/config";
-import { Sr25519Account } from "@unique-nft/utils/sr25519";
+import { Sr25519Account } from "@unique-nft/sr25519";
 import { UniqueChain } from "@unique-nft/sdk";
 
 it("Substrate: Can mint collection for free and mint tokens for free after that", async () => {
@@ -104,5 +104,5 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
 
   // NOTE: check that user's balance doesn't change
   const userBalanceAfter = await sdk.balance.get(user);
-  expect(userBalanceAfter.available).to.eq(userBalanceBefore.available);
+  expect(userBalanceAfter.available).to.deep.eq(userBalanceBefore.available);
 });

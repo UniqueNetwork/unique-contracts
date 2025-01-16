@@ -93,7 +93,7 @@ contract BreedingGame is CollectionMinter, TokenMinter, TokenManager, AddressVal
         attributes[2] = Attribute({trait_type: "Defeats", value: "0"});
         attributes[3] = Attribute({trait_type: "Generation", value: "0"});
 
-        uint256 tokenId = _createToken(COLLECTION_ADDRESS, randomImage, attributes, _owner);
+        uint256 tokenId = _createToken(COLLECTION_ADDRESS, randomImage, "", "", attributes, _owner);
         s_tokenStats[tokenId] = TokenStats({
             breed: randomTokenBreed,
             generation: 0,

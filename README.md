@@ -97,7 +97,7 @@ Provides functions to create tokens in the Unique Schema V2.
 
 ---
 
-`_createToken(address _collectionAddress, string _image, Attribute[] _attributes, CrossAddress _to) internal returns (uint256)`
+`_createToken(address _collectionAddress, string _name, string _description, string _image, Attribute[] _attributes, CrossAddress _to) internal returns (uint256)`
 
 Internal function to create a new token with specified image and attributes in a given collection.
 

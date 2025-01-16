@@ -28,12 +28,17 @@ abstract contract TokenMinter {
     function _createToken(
         address _collectionAddress,
         string memory _image,
+        string memory _name,
+        string memory _description,
         Attribute[] memory _attributes,
         CrossAddress memory _to
     ) internal returns (uint256) {
         UniqueNFT nft = UniqueNFT(_collectionAddress);
 
-        Property memory tokenData = Property({key: "tokenData", value: _buildTokenData(_attributes, _image)});
+        Property memory tokenData = Property({
+            key: "tokenData",
+            value: _buildTokenData(_attributes, _image, _name, _description)
+        });
 
         Property[] memory properties = new Property[](3);
         properties[0] = Property({key: "schemaName", value: "unique"});
@@ -44,20 +49,35 @@ abstract contract TokenMinter {
     }
 
     /**
-     * @dev Builds tokenData attribute JSON string from attributes and image.
+     * @dev Builds tokenData attribute JSON string from attributes, image, name, and description.
      * @param _attributes Array of attributes for the token.
      * @param _image URL of the token image.
+     * @param _name Name of the token (optional).
+     * @param _description Description of the token (optional).
      * @return Token data JSON string in bytes.
      */
-    function _buildTokenData(Attribute[] memory _attributes, string memory _image) private pure returns (bytes memory) {
-        return
-            abi.encodePacked(
-                '{"schemaName":"unique","schemaVersion":"2.0.0","image":"',
-                _image,
-                '",',
-                _buildAttributes(_attributes),
-                "}"
-            );
+    function _buildTokenData(
+        Attribute[] memory _attributes,
+        string memory _image,
+        string memory _name,
+        string memory _description
+    ) private pure returns (bytes memory) {
+        bytes memory json = abi.encodePacked('{"schemaName":"unique","schemaVersion":"2.0.0","image":"', _image, '"');
+
+        // Add name if not empty
+        if (bytes(_name).length > 0) {
+            json = abi.encodePacked(json, ',"name":"', _name, '"');
+        }
+
+        // Add description if not empty
+        if (bytes(_description).length > 0) {
+            json = abi.encodePacked(json, ',"description":"', _description, '"');
+        }
+
+        // Add attributes and close JSON
+        json = abi.encodePacked(json, ",", _buildAttributes(_attributes), "}");
+
+        return json;
     }
 
     /**
