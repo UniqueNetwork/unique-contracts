@@ -100,9 +100,11 @@ contract Minter is CollectionMinter, TokenMinter {
     function mintToken(
         address _collectionAddress,
         string memory _image,
+        string memory _name,
+        string memory _description,
         Attribute[] memory _attributes,
         CrossAddress memory _tokenOwner
     ) external onlyCollectionOwner(_collectionAddress) {
-        _createToken(_collectionAddress, _image, "", "", _attributes, _tokenOwner);
+        _createToken(_collectionAddress, _image, _name, _description, _attributes, _tokenOwner);
     }
 }
