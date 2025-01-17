@@ -2,6 +2,7 @@
 pragma solidity >=0.8.18 <=0.8.24;
 
 import {UniqueNFT, Property, CrossAddress} from "@unique-nft/solidity-interfaces/contracts/UniqueNFT.sol";
+import "./libraries/BytesUtils.sol";
 
 /**
  * @dev Struct to represent an attribute of a token.
@@ -18,6 +19,8 @@ struct Attribute {
  * @dev Abstract contract for minting tokens in the Unique V2 Schema.
  */
 abstract contract TokenMinter {
+    using BytesUtils for bytes;
+
     /**
      * @dev Internal function to create a new token.
      * @param _collectionAddress Address of the collection to mint the token in.
@@ -37,7 +40,7 @@ abstract contract TokenMinter {
 
         Property memory tokenData = Property({
             key: "tokenData",
-            value: _buildTokenData(_attributes, _image, _name, _description)
+            value: _buildTokenData(_image, _name, _description, _attributes)
         });
 
         Property[] memory properties = new Property[](3);
@@ -50,31 +53,36 @@ abstract contract TokenMinter {
 
     /**
      * @dev Builds tokenData attribute JSON string from attributes, image, name, and description.
-     * @param _attributes Array of attributes for the token.
      * @param _image URL of the token image.
      * @param _name Name of the token (optional).
      * @param _description Description of the token (optional).
+     * @param _attributes Array of attributes for the token.
      * @return Token data JSON string in bytes.
      */
     function _buildTokenData(
-        Attribute[] memory _attributes,
         string memory _image,
         string memory _name,
-        string memory _description
+        string memory _description,
+        Attribute[] memory _attributes
     ) private pure returns (bytes memory) {
         bytes memory json = abi.encodePacked('{"schemaName":"unique","schemaVersion":"2.0.0","image":"', _image, '"');
 
-        // Add name if not empty
-        if (bytes(_name).length > 0) {
-            json = abi.encodePacked(json, ',"name":"', _name, '"');
+        bytes memory escapedName = bytes(_name).length > 0 ? BytesUtils.escapeString(bytes(_name)) : bytes("");
+        bytes memory escapedDescription = bytes(_description).length > 0
+            ? BytesUtils.escapeString(bytes(_description))
+            : bytes("");
+
+        // Append name if it exists
+        if (escapedName.length > 0) {
+            json = abi.encodePacked(json, ',"name":"', escapedName, '"');
         }
 
-        // Add description if not empty
-        if (bytes(_description).length > 0) {
-            json = abi.encodePacked(json, ',"description":"', _description, '"');
+        // Append description if it exists
+        if (escapedDescription.length > 0) {
+            json = abi.encodePacked(json, ',"description":"', escapedDescription, '"');
         }
 
-        // Add attributes and close JSON
+        // Append attributes and close JSON
         json = abi.encodePacked(json, ",", _buildAttributes(_attributes), "}");
 
         return json;

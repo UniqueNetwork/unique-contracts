@@ -20,13 +20,13 @@ it("EVM: Can mint collection for free and mint tokens for free after that", asyn
   // NOTE: minterOwner deploy Minter contract
   const MinterFactory = await ethers.getContractFactory("Minter");
   const minter = await MinterFactory.connect(minterOwner).deploy({
-    gasLimit: 3000_000,
+    gasLimit: 3500_000,
     value: parseEther("100"),
   });
   await minter.waitForDeployment();
   const minterAddress = await minter.getAddress();
 
-  // NOTE: minterOwner sets self-sponsorship for the contract
+  // // NOTE: minterOwner sets self-sponsorship for the contract
   const contractHelpers = testConfig.contractHelpers.connect(minterOwner);
   await contractHelpers
     .selfSponsoredEnable(minter, { gasLimit: 300_000 })
@@ -77,10 +77,12 @@ it("EVM: Can mint collection for free and mint tokens for free after that", asyn
     .mintToken(
       event.args.collectionAddress,
       "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmY7hbSNiwE3ApYp83CHWFdqrcEAM6AvChucBVA6kC1e8u",
+      'Token "Name"',
+      'This is "the" description',
       [{ trait_type: "Power", value: "42" }],
       // CrossAddress: user sets its own address as a token owner
       { eth: user.address, sub: 0 },
-      { gasLimit: 300000 },
+      { gasLimit: 500000 },
     )
     .then((tx) => tx.wait());
 

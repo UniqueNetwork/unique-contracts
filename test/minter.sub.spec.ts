@@ -91,6 +91,8 @@ it("Substrate: Can mint collection for free and mint tokens for free after that"
     functionArgs: [
       event.args.collectionAddress,
       "https://orange-impressed-bonobo-853.mypinata.cloud/ipfs/QmY7hbSNiwE3ApYp83CHWFdqrcEAM6AvChucBVA6kC1e8u",
+      'Token "Name"',
+      'This is "the" description',
       [{ trait_type: "Power", value: "42" }],
       // NOTICE: CrossAddress - set a substrate address as a token owner
       {
